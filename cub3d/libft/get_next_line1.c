@@ -1,4 +1,4 @@
-#include "get_next_line1.h"
+#include"../includes/get_next_line1.h"
 #include<fcntl.h>
 
 char *fill_line_buffer(int fd, char *leftovers, char *buffer, int *flag)
@@ -56,7 +56,6 @@ char *get_next_line(int fd)
 		free(left);
 		left = NULL;
 	}
-	printf("get_next_line line content (%p)\n", left);
 	if (fd < 0 || BUFFER_SIZE == 0 || flag)
 		return(NULL);
 	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
@@ -70,25 +69,4 @@ char *get_next_line(int fd)
 	tmp = NULL;
 	free(buffer);
 	return (line);
-}
-int main()
-{
-	int fd = open("file.txt", O_RDONLY, 0644);
-	char *line;
-	line = get_next_line(fd);
-	printf("result %s\n", line);
-	free(line);
-	line = get_next_line(fd);
-	printf("result %s\n", line);
-	line = get_next_line(fd);
-	printf("result %s\n", line);
-	line = get_next_line(fd);
-	printf("result %s\n", line);
-	free(line);
-	line = get_next_line(fd);
-	printf("result %s\n", line);
-	line = get_next_line(fd);
-	printf("result %s\n", line);
-	free(line);
-	close(fd);
 }

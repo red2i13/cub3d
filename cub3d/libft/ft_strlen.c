@@ -6,7 +6,7 @@
 /*   By: rbenmakh <rbenmakh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 16:11:37 by rbenmakh          #+#    #+#             */
-/*   Updated: 2024/10/10 20:38:51 by rbenmakh         ###   ########.fr       */
+/*   Updated: 2024/10/15 14:46:22 by rbenmakh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ size_t	ft_strlen(const char *s)
 	size_t	i;
 
 	i = 0;
+	if(!s || !s[0])
+		return(0);
 	while (s[i] != '\0')
 	{
 		i++;

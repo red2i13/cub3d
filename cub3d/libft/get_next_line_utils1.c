@@ -1,34 +1,6 @@
-#include"get_next_line1.h"
+#include"../includes/get_next_line1.h"
 
-size_t	ft_strlen(const char *s)
-{
-	size_t	i;
 
-	i = 0;
-	while (s[i] != '\0')
-	{
-		i++;
-	}
-	return (i);
-}
-
-char	*ft_strchr(const char *s, int c)
-{
-	size_t	i;
-	size_t	len;
-
-	i = 0;
-	len = ft_strlen(s);
-	while (s[i])
-	{
-		if (s[i] == (char)c)
-			return ((char *)s + i);
-		i++;
-	}
-	if ((char)c == s[i])
-		return ((char *)s + len);
-	return (NULL);
-}
 size_t	ft_strlcpy(char *dst, const char *src, size_t dstsize)
 {
 	size_t	i;
@@ -49,9 +21,9 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
 	char	*ptr;
 
-	if (!s)
+	if (!s || !s[0])
 		return (NULL);
-	if (len > ft_strlen(s) - start)
+ 	if (len > ft_strlen(s) - start)
 		len = ft_strlen(s) - start;
 	ptr = malloc((len + 1) * sizeof(char));
 	if (ptr == NULL)

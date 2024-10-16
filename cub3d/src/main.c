@@ -15,5 +15,23 @@ int check_file_name(char *str)
 }
 int main()
 {
-	if
+	//char str[99];
+	// while(1)
+	// {
+		// str[0] = 'f';
+		// scanf("%[^\n]%*c", str);
+		// if(!str[0])
+		// 	break;
+		// printf("func %i\n",check_file_name(str));
+	// }
+	//int fd = open("Makefile", 0644);
+	while (1)
+	{
+		char *str = get_next_line(0);
+		printf("(%s)\n", str);
+		if(!str)
+			break;
+		free(str);
+	}
+	return (0);
 }
