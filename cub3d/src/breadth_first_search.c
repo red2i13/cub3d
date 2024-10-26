@@ -67,71 +67,90 @@ void	dequeue(t_node **list, t_node *current)
 	return ;
 }
 
-int	neighbors(t_node **queue, t_node *cur, t_mlx *d, int **vis)
+int	neighbors(t_node **queue, t_node *cur, t_gdata *d, int **vis)
 {
 	int	x;
 	int	y;
 
 	x = cur->x;
 	y = cur->y;
-	if (x + 1 < d->w_h / 50 - 1 && (d->map[x + 1][y] != '1' && d->map[x
-			+ 1][y] != 'E') && vis[x + 1][y] == 0)
+	if (x + 1 < d->map_y - 1 && (d->map[x + 1][y] != '1' && d->map[x
+			+ 1][y] != ' ') && vis[x + 1][y] == 0)
 		enqueue(queue, x + 1, y);
-	if (x - 1 > 0 && (d->map[x - 1][y] != '1' && d->map[x - 1][y] != 'E')
+	if (x - 1 > 0 && (d->map[x - 1][y] != '1' && d->map[x - 1][y] != ' ')
 		&& vis[x - 1][y] == 0)
 		enqueue(queue, x - 1, y);
-	if (y + 1 < d->w_w / 50 - 1 && (d->map[x][y + 1] != '1' && d->map[x][y
-		+ 1] != 'E') && vis[x][y + 1] == 0)
+	if (y + 1 < d->map_x - 1 && (d->map[x][y + 1] != '1' && d->map[x][y
+		+ 1] != ' ') && vis[x][y + 1] == 0)
 		enqueue(queue, x, y + 1);
-	if (y - 1 > 0 && (d->map[x][y - 1] != '1' && d->map[x][y - 1] != 'E')
+	if (y - 1 > 0 && (d->map[x][y - 1] != '1' && d->map[x][y - 1] != ' ')
 		&& vis[x][y - 1] == 0)
 		enqueue(queue, x, y - 1);
 	return (EXIT_SUCCESS);
 }
 
-int	init_row(int **arr, int i, t_mlx *d)
+int	init_row(int **arr, int i, char **map, int len_r)
 {
 	int	j;
 
 	j = 0;
-	arr[i] = (int *)malloc(sizeof(int) * d->w_w / 50);
+	arr[i] = (int *)malloc(sizeof(int) * len_r);
 	if (!arr[i])
 	{
-		free_arr(d, (void **)arr, i, 0);
+		//free_arr(d, (void **)arr, i, 0);
 		return (1);
 	}
-	while (j < d->w_w / 50)
+	while (j < len_r)
 	{
 		arr[i][j] = 0;
 		j++;
 	}
 	return (EXIT_SUCCESS);
 }
+int	find_longest_row(char **map)
+{
+	int	i;
+	int	len;
+	int	max;
 
-int	bfs(int st_x, int st_y, t_mlx *d)
+	i = 0;
+	max = 0;
+	if (!map)
+		return (0);
+	while (map[i])
+	{
+		len = ft_strlen(map[i]);
+		if (len > max)
+			max = len;
+		i++;
+	}
+	return (max);
+}
+
+int	bfs(int st_x, int st_y, t_gdata *d)
 {
 	t_node	*queue;
 	int		**arr;
 	int		i;
 
 	i = 0;
-	arr = malloc(sizeof(int *) * d->w_h / 50);
+	arr = malloc(sizeof(int *) * d->map_y);
 	if (!arr)
 		return (1);
-	while (i < d->w_h / 50)
+	while (i < d->map_y)
 	{
-		if (init_row(arr, i, d))
+		if (init_row(arr, i, d->map, d->map_x))
 			return (1);
 		i++;
 	}
 	queue = NULL;
-	enqueue(&queue, st_x / 50, st_y / 50);
+	enqueue(&queue, st_x, st_y);
 	while (queue)
 	{
 		arr[queue->x][queue->y] = 6;
 		neighbors(&queue, queue, d, arr);
 		dequeue(&queue, queue);
 	}
-	d->bmap = arr;
+	//d->bmap = arr;
 	return (EXIT_SUCCESS);
 }

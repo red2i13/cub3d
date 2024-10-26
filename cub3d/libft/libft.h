@@ -15,7 +15,8 @@
 
 # include <stddef.h>
 # include <stdlib.h>
-# include "../includes/get_next_line1.h"
+#include <fcntl.h>
+# include "../includes/get_next_line.h"
 
 typedef struct s_list
 {

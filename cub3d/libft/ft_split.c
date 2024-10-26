@@ -99,6 +99,8 @@ char	**ft_split(char const *s, char c)
 	if (!s)
 		return (NULL);
 	wordslen = ft_words(s, c);
+	if(wordslen == 0)
+		return (NULL);
 	ptr = ft_fill(s, c, wordslen, -1);
 	if (ptr == NULL)
 		return (NULL);
