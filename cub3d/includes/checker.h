@@ -1,6 +1,10 @@
 #ifndef CHECKER_H
 #define CHECKER_H
 
+
+/*Macros*/
+#define M_PI acos(-1.0)
+
 /*struct*/
 typedef struct node
 {
@@ -10,8 +14,20 @@ typedef struct node
 	int			y;
 }				t_node;
 
+typedef struct s_player {
+	int x;
+	int y;
+	int radius;
+	int turn_dir;
+	int walk_dir;
+	double rot_angle;
+	double move_speed;
+	int rot_speed;
+}				t_player;
+
 typedef struct s_gdata
 {
+	t_player *p;
 	char **map;
 	int st_pos[2];
 	int c[3];
@@ -34,14 +50,15 @@ typedef struct s_data {
 }				t_data;
 
 
+
 /*libs headers*/
 #include <stdio.h>
 #include <mlx.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "../libft/libft.h"
-
 
 /*Functions prototype*/
 int	find_longest_row(char **map, t_gdata *d);
