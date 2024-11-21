@@ -7,7 +7,7 @@ LIBFT_DIR = /libft/include
 LIB = libft
 SRC_DIR = src
 #______files______#
-FILES = main.c
+FILES = main.c win_func.c parse.c check_algo.c
 FILES_BONUS =
 
 #______patterns and substitutions based on BONUS variable______#
@@ -33,7 +33,7 @@ $(LIB)/libft.a:
 	$(MAKE) -C $(LIB) all
 
 #$(NAME): $(OBJECTS) libmlx_Linux.a libft/libft.a
-$(NAME): $(OBJECTS) libft/libft.a
+$(NAME): $(OBJECTS) libft/libft.a libmlx_Linux.a
 	$(CC) $(CFLAGS) $^ -o $@ -lXext -lX11 -lm -lz
 
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.c
