@@ -32,28 +32,32 @@ function drawDisc(centerX, centerY, radius):
         // Draw line from center to edge of disc along this radius
         drawLine(centerX, centerY, x, y)
 */
-void draw_circle(t_data *data, double cx, double cy, int radius)
+void draw_circle(t_data *data, double cx, double cy, float radius)
 {
-
-	double x, y;
-	int angle;
-	angle =0;
-	sleep(1);
-	while(angle < 360)
+	/* PROTOTYPEfor(int y=-radius; y<=radius; y++)
+    for(int x=-radius; x<=radius; x++)
+        if(x*x+y*y <= radius*radius)
+            setpixel(origin.x+x, origin.y+y);
+	*/
+	int x, y;
+	x= -radius;
+	y = -radius;
+	//sleep(1);
+	while(y <= radius)
 	{
-		x = cx + radius * cos(angle * M_PI / 180);
-		y = cy + radius * sin(angle * M_PI / 180);
-		printf("%f %f\n", x, y);
-		// while (x > cx && y > cy)
-		// {
-		// 	my_mlx_pixel_put(data, cx + (int)x  , cy + (int)y  , 0xFF00FF);
-		// 	x--;
-		// 	y--;
-		// }
-		angle++;
+		x = -radius;
+		while (x <= radius)
+		{
+			if((x * x) +( y * y) <= (radius * radius))
+			{
+				printf("%i %i\n", x, y);
+				my_mlx_pixel_put(data, cx + x, cy + y, 0xFF00FF);
+			}
+			x++;
+		}
+		y++;
 	}
 	mlx_put_image_to_window(data->s, data->win, data->img, 0, 0);
-
 }
 /*TASK TO DO
 -MAKE MACROS OF KEYS
@@ -78,7 +82,7 @@ int main(int ac, char **av)
 	d.addr = mlx_get_data_addr(d.img, &d.bits_per_pixel, &d.line_length, &d.endian);
 	//why sleep fix the display of the window ?????
 	//usleep(20000);
-	draw_circle(&d, 100, 100, 105);
+	draw_circle(&d, 100, 100, 46);
 	// while(1)
 	// {
 	// 	draw_map(&st, &d);
