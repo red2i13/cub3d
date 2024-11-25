@@ -28,13 +28,21 @@ void color_square(int x, int y, int color, t_data *d)
 		}
 	}
 }
-int     close_win(int key_press, t_data *d)
+int     key_release(int keycode, t_player *p)
 {
-        if (key_press == 65307)
-        {
-                cross_win(d);
-        }
-        return (EXIT_SUCCESS);
+	(void)p;
+	printf("key released %i\n", keycode);
+	if(keycode == 119)
+		p->walk_dir = 0;
+	if(keycode == 115)
+		p->walk_dir = 0;
+	if(keycode == 100)
+		p->turn_dir = 0;
+	if(keycode == 97)
+		p->turn_dir = 0;
+	// printf("walk dir %i\n", p->walk_dir);
+	// printf("turn dir %i\n", p->turn_dir);
+	return (EXIT_SUCCESS);
 }
 void draw_map(t_gdata *d, t_data *data)
 {

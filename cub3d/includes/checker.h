@@ -68,7 +68,7 @@ void free_arr(void **arr, int i);
 int	cross_win(t_data *d);
 void	my_mlx_pixel_put(t_data *data, int x, int y, int color);
 void color_square(int x, int y, int color, t_data *d);
-int     close_win(int key_press, t_data *d);
+int     key_release(int keycode, t_player *p);
 void draw_map(t_gdata *d, t_data *data);
 int	bfs(int st_x, int st_y, t_gdata *d, t_data *data);
 #endif
