@@ -4,7 +4,7 @@
 
 /*Macros*/
 #define M_PI acos(-1.0)
-
+#define T_SIZE 48
 /*struct*/
 typedef struct node
 {
@@ -22,7 +22,7 @@ typedef struct s_player {
 	int walk_dir;
 	double rot_angle;
 	double move_speed;
-	int rot_speed;
+	float rot_speed;
 }				t_player;
 
 typedef struct s_gdata
@@ -40,6 +40,7 @@ typedef struct s_gdata
 }				t_gdata;
 
 typedef struct s_data {
+	t_gdata *gdata;
 	void	*s;
 	void	*win;
 	void 	*img;

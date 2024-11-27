@@ -2,8 +2,8 @@
 
 void init_player(t_gdata *data)
 {
-	data->p->x = data->st_pos[0];
-	data->p->y = data->st_pos[1];
+	data->p->y = data->st_pos[0] * T_SIZE + T_SIZE /2;
+	data->p->x = data->st_pos[1] * T_SIZE + T_SIZE /2;
 	data->p->move_speed = 3.0;
 	data->p->radius = 3;
 	data->p->turn_dir = 0; //if turn left -1 right 1
@@ -30,13 +30,70 @@ void draw_circle(t_data *data, double cx, double cy, float radius)
 	}
 	mlx_put_image_to_window(data->s, data->win, data->img, 0, 0);
 }
-void draw_line(t_data *data, int angle, int x, int y)
-{
+/*
+void bresenham(int x0, int y0, int x1, int y1) {
+    int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+    int err = (dx > dy ? dx : -dy) / 2;
 
+    while (setpixel(x0, y0), x0 != x1 || y0 != y1) {
+        int e2 = err;
+        if (e2 > -dx) { err -= dy; x0 += sx; }
+        if (e2 <  dy) { err += dx; y0 += sy; }
+    }
+}*/
+void draw_line(t_data *data, double angle, int x, int y)
+{
+	int dx;
+	int dy;
+	int x1, y1;
+	int sx, sy;
+	int p;
+	
+	dx = (int)(cos(angle) * 30);
+	dy = (int)(sin(angle) * 30);
+	x1 = x + dx;
+	y1 = y + dy;
+	sx = (dx >= 0) * 1 +  (dx < 0) * -1;
+	sy = (dy >= 0) * 1 +  (dy < 0) * -1;
+	dx = abs(dx); 
+	dy = abs(dy);
+    if(dx > dy)
+	{
+		p = 2 * dy - dx;
+		while (x != x1 )
+		{
+			my_mlx_pixel_put(data, x, y, 0xFF00FF);
+			x+=sx;
+			if(p >= 0)
+			{
+				y+=sy;
+				p-=2*dx;
+			}
+			p=p+2*dy;
+		}
+	}
+	else 
+	{
+		p = 2 * dx - dy; 
+		while (y != y1) 
+		{ 
+			my_mlx_pixel_put(data, x, y, 0xFF00FF);
+			y += sy;
+			if (p >= 0)
+			{
+				x += sx;
+				p -= 2 * dy;
+			}
+				p += 2 * dx; 
+		}
+	}
 }
+
 /*TASK TO DO
--MAKE A FUNC THAT UPDATE THE VAR OF THE PLAYER
--MAKE A FUNC THAT DRAW A LINE
+-Complete chapter 3 
+-Begin chatp 4
+
 -BONUS: MAKE A FUNCTION THAT DISPLAY A LINE BASED ON X Y COORDINATES
 
 */
@@ -45,23 +102,35 @@ void draw_line(t_data *data, int angle, int x, int y)
 int key_press(int keycode, t_player *p)
 {
 	(void)p;
-	printf("THE BUTTON PRESSED %i\n", keycode);
+	// printf("THE BUTTON PRESSED %i\n", keycode);
 	if(keycode == 119)
 		p->walk_dir = 1;
 	if(keycode == 115)
 		p->walk_dir = -1;
 	if(keycode == 100)
-		p->turn_dir = -1;
-	if(keycode == 97)
 		p->turn_dir = 1;
-	// printf("walk dir %i\n", p->walk_dir);
-	// printf("turn dir %i\n", p->turn_dir);
+	if(keycode == 97)
+		p->turn_dir = -1;
+	// printf("walk dirc %i\n", p->walk_dir);
 	return(0);
 }
-int movement1(int keycode, void *param)
+
+int update(t_data *d)
 {
-	(void)param;
-	printf("THE BUTTON RELEASED %i\n", keycode);
+	draw_map(d->gdata, d);
+	draw_circle(d,  d->gdata->p->x , d->gdata->p->y, 4);
+	draw_line(d,  d->gdata->p->rot_angle , d->gdata->p->x , d->gdata->p->y);
+	//make a function for the movement
+	d->gdata->p->rot_angle += d->gdata->p->turn_dir * d->gdata->p->rot_speed;
+	int move_step;
+	move_step = d->gdata->p->move_speed * d->gdata->p->walk_dir;
+	int sx, sy;
+	sx = round(move_step * cos(d->gdata->p->rot_angle));
+	sy = round(move_step * sin(d->gdata->p->rot_angle));
+
+	d->gdata->p->x += sx *(d->gdata->map[d->gdata->p->y/T_SIZE][(d->gdata->p->x + sx)/T_SIZE ] != '1');
+	d->gdata->p->y += sy *(d->gdata->map[(d->gdata->p->y + sy)/T_SIZE ][d->gdata->p->x/T_SIZE] != '1');
+	//
 	return(0);
 }
 int main(int ac, char **av)
@@ -79,27 +148,16 @@ int main(int ac, char **av)
 	read_map(open(av[1], 0644), &st);
 	init_player(&st);
 	d.s = mlx_init();
-	d.win = mlx_new_window(d.s,  st.map_x * 32, st.map_y * 32, "Cub3d by ysahraou and rbenmakh");
-	d.img = mlx_new_image(d.s, st.map_x * 32, st.map_y * 32);
+	d.win = mlx_new_window(d.s,  st.map_x * T_SIZE, st.map_y * T_SIZE, "Cub3d by ysahraou and rbenmakh");
+	d.img = mlx_new_image(d.s, st.map_x * T_SIZE, st.map_y * T_SIZE);
 	d.addr = mlx_get_data_addr(d.img, &d.bits_per_pixel, &d.line_length, &d.endian);
-	//why sleep fix the display of the window ?????
-	//usleep(20000);
-	// while(1)
-	// {
-	// 	draw_circle(&d, 100, 100, 3);
-	// 	draw_map(&st, &d);
-	// 	usleep(10000);
-		
-	// }
-	/*
-		UP : 119
-		DOWN : 115
-		RIGHT: 100
-		LEFT: 97
-	*/
+	d.gdata = &st;
+
+
 	mlx_hook(d.win, 2, 1<<0, key_press, &p);
 	mlx_hook(d.win, 3, 1<< 1, key_release, &p);
 	mlx_hook(d.win, 17, 1L << 0, cross_win, &d);
+	mlx_loop_hook(d.s, update, &d);
 	mlx_loop(d.s);
 	return(0);
 }

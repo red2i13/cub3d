@@ -26,7 +26,7 @@ int read_map(int fd, t_gdata *data)
 	data->map = ft_split(full, '\n');
 	data->map_y = j;
 	data->map_x = find_longest_row(data->map, data);
-	printf("st_pos: %d %d\n", data->st_pos[0], data->st_pos[1]);
+	printf("starting position: %d %d\n", data->st_pos[0], data->st_pos[1]);
 
 	free(full);
 	close(fd);

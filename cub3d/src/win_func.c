@@ -17,21 +17,21 @@ void	my_mlx_pixel_put(t_data *data, int x, int y, int color)
 }
 void color_square(int x, int y, int color, t_data *d)
 {
-	for(int i = 0; i < 32; i++)
+	for(int i = 0; i < T_SIZE; i++)
 	{
-		for(int j = 0; j < 32; j++)
+		for(int j = 0; j < T_SIZE; j++)
 		{
-			if(i == 0 || j == 0 || i == 32 -1 || j == 32 -1)
-				my_mlx_pixel_put(d, x * 32 + i, y * 32 + j, 0x000000);
+			if(i == 0 || j == 0 || i == T_SIZE -1 || j == T_SIZE -1)
+				my_mlx_pixel_put(d, x * T_SIZE + i, y * T_SIZE + j, 0x000000);
 			else
-				my_mlx_pixel_put(d, x * 32 + i, y * 32 + j, color);
+				my_mlx_pixel_put(d, x * T_SIZE + i, y * T_SIZE + j, color);
 		}
 	}
 }
 int     key_release(int keycode, t_player *p)
 {
 	(void)p;
-	printf("key released %i\n", keycode);
+	// printf("key released %i\n", keycode);
 	if(keycode == 119)
 		p->walk_dir = 0;
 	if(keycode == 115)
@@ -65,7 +65,7 @@ void draw_map(t_gdata *d, t_data *data)
 			else if(d->map[i][j] == '5')
 				color_square(j, i, 0x000000FF, data);
 			else if(d->map[i][j] == 'P')
-				color_square(j, i, 0x00FF00FF, data);
+				color_square(j, i, 0x00FFFFFF, data);
 			j++;
 		}
 		i++;
