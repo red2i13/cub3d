@@ -3,8 +3,13 @@
 
 
 /*Macros*/
+#define W_WIDTH 640
+#define W_HEIGHT 480
 #define M_PI acos(-1.0)
 #define T_SIZE 48
+#define FOV 60 * (M_PI / 180)
+#define WALL_STRIP_WIDTH 30
+#define NUM_RAYS W_WIDTH/WALL_STRIP_WIDTH
 /*struct*/
 typedef struct node
 {
@@ -67,6 +72,8 @@ int read_map(int fd, t_gdata *data);
 void draw_map(t_gdata *d, t_data *data);
 void free_arr(void **arr, int i);
 int	cross_win(t_data *d);
+void draw_line(t_data *data, double angle, int x, int y);
+void draw_circle(t_data *data, double cx, double cy, float radius);
 void	my_mlx_pixel_put(t_data *data, int x, int y, int color);
 void color_square(int x, int y, int color, t_data *d);
 int     key_release(int keycode, t_player *p);

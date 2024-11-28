@@ -4,7 +4,7 @@ void init_player(t_gdata *data)
 {
 	data->p->y = data->st_pos[0] * T_SIZE + T_SIZE /2;
 	data->p->x = data->st_pos[1] * T_SIZE + T_SIZE /2;
-	data->p->move_speed = 3.0;
+	data->p->move_speed = 3.0;//2 for linux post
 	data->p->radius = 3;
 	data->p->turn_dir = 0; //if turn left -1 right 1
 	data->p->walk_dir = 0; // move upword 1 move backward -1
@@ -30,18 +30,48 @@ void draw_circle(t_data *data, double cx, double cy, float radius)
 	}
 	mlx_put_image_to_window(data->s, data->win, data->img, 0, 0);
 }
-/*
-void bresenham(int x0, int y0, int x1, int y1) {
-    int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-    int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-    int err = (dx > dy ? dx : -dy) / 2;
 
-    while (setpixel(x0, y0), x0 != x1 || y0 != y1) {
-        int e2 = err;
-        if (e2 > -dx) { err -= dy; x0 += sx; }
-        if (e2 <  dy) { err += dx; y0 += sy; }
-    }
-}*/
+void draw_rays(t_data *d)
+{
+	int col_id;
+	t_player *p;
+	double xstep;
+	double ystep;
+
+	float s_ang = p->rot_angle - (FOV / 2.0);
+	long ix, iy;
+
+	iy = (p->y / 32) * 32; 
+	ix = p->x + (p->y - iy) / tan(s_ang);
+	
+
+
+
+
+
+
+
+
+
+
+
+	//calculate the horizontal intersection
+
+	//calculate the vertical intersection
+	// (void)col_id;
+	// col_id = 0;
+	// p = d->gdata->p;
+	// float incre = FOV / (NUM_RAYS - 1);
+	// printf("t %f %f\n", incre * NUM_RAYS, FOV);
+	// for(int i = 0; i < NUM_RAYS; i++)
+	// {
+	// 	//cast each ray
+	// 	draw_line(d, s_ang, p->x, p->y);
+	// 	s_ang = s_ang + incre;
+	// 	col_id++;
+	// }
+	
+}
 void draw_line(t_data *data, double angle, int x, int y)
 {
 	int dx;
@@ -66,7 +96,7 @@ void draw_line(t_data *data, double angle, int x, int y)
 			my_mlx_pixel_put(data, x, y, 0xFF00FF);
 			x+=sx;
 			if(p >= 0)
-			{
+				{
 				y+=sy;
 				p-=2*dx;
 			}
@@ -91,7 +121,7 @@ void draw_line(t_data *data, double angle, int x, int y)
 }
 
 /*TASK TO DO
--Complete chapter 3 
+-To calculate the horizantal intersection with the grid (delta'y' / 32) *32 
 -Begin chatp 4
 
 -BONUS: MAKE A FUNCTION THAT DISPLAY A LINE BASED ON X Y COORDINATES
@@ -119,7 +149,14 @@ int update(t_data *d)
 {
 	draw_map(d->gdata, d);
 	draw_circle(d,  d->gdata->p->x , d->gdata->p->y, 4);
-	draw_line(d,  d->gdata->p->rot_angle , d->gdata->p->x , d->gdata->p->y);
+	//draw_line(d,  d->gdata->p->rot_angle , d->gdata->p->x , d->gdata->p->y);
+		// draw_line(d, M_PI /2, d->gdata->p->x , d->gdata->p->y);
+		// draw_line(d, 0      , d->gdata->p->x , d->gdata->p->y);
+		// draw_line(d, M_PI   , d->gdata->p->x , d->gdata->p->y);
+
+	draw_rays(d);
+
+
 	//make a function for the movement
 	d->gdata->p->rot_angle += d->gdata->p->turn_dir * d->gdata->p->rot_speed;
 	int move_step;
