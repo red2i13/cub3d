@@ -18,6 +18,16 @@ typedef struct node
 	int			x;
 	int			y;
 }				t_node;
+typedef struct s_ray
+{
+	double	angle;
+	int		column_id;
+	int		hit_x;
+	int		hit_y;
+	double	distance;
+	bool	is_down
+	bool	is_up;
+}				t_ray;
 
 typedef struct s_player {
 	int x;

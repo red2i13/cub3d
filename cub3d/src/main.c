@@ -30,46 +30,63 @@ void draw_circle(t_data *data, double cx, double cy, float radius)
 	}
 	mlx_put_image_to_window(data->s, data->win, data->img, 0, 0);
 }
-
+double norm_angle(double angle)
+{
+	angle = fmod(angle , (2 * M_PI));
+	if(angle < 0)
+		angle = angle + (2 * M_PI);
+	return(angle);
+}
+int rad2deg(double angle)
+{
+	return((angle * 180) / M_PI);
+}
 void draw_rays(t_data *d)
 {
 	int col_id;
 	t_player *p;
-	double xstep;
-	double ystep;
+	t_ray rays[NUM_RAYS];
 
 	float s_ang = p->rot_angle - (FOV / 2.0);
-	long ix, iy;
+	col_id = 0;
+	for(int i = 0; i < NUM_RAYS; i++)
+	{
+		rays[col_id].angle = norm_angle(s_ang);
+		//horizontal intersection
+		double xstep;
+		double ystep;
+		// printf("angle in deg %d\n", rad2deg(norm_angle(s_ang)));
+		long ix, iy;
 
-	iy = (p->y / 32) * 32; 
-	ix = p->x + (p->y - iy) / tan(s_ang);
-	
+		iy = floor(p->y / T_SIZE) * T_SIZE; 
+		ix = p->x + (p->y - iy) / tan(rays[col_id].angle);
+
+		ystep = T_SIZE;
+		xstep = T_SIZE / tan(rays[col_id].angle);
+
+		//vertical intersection
+		long ix, iy;
+
+		ix = (p->x / T_SIZE) * T_SIZE; 
+		ix = p->y + (p->x - ix) / tan(rays[col_id].angle);
+		printf("ver %f %f\n", ix, iy);
+		xstep = T_SIZE;
+		ystep = T_SIZE / tan(rays[col_id].angle);
+		//
+		col_id++;
+		break;
+	}
 
 
 
 
-
-
-
-
-
-
-
-	//calculate the horizontal intersection
-
-	//calculate the vertical intersection
 	// (void)col_id;
-	// col_id = 0;
 	// p = d->gdata->p;
 	// float incre = FOV / (NUM_RAYS - 1);
 	// printf("t %f %f\n", incre * NUM_RAYS, FOV);
-	// for(int i = 0; i < NUM_RAYS; i++)
-	// {
 	// 	//cast each ray
 	// 	draw_line(d, s_ang, p->x, p->y);
 	// 	s_ang = s_ang + incre;
-	// 	col_id++;
-	// }
 	
 }
 void draw_line(t_data *data, double angle, int x, int y)
