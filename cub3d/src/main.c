@@ -46,50 +46,135 @@ void draw_rays(t_data *d)
 	int col_id;
 	t_player *p;
 	t_ray rays[NUM_RAYS];
-
+	
+	p = d->gdata->p;
 	float s_ang = p->rot_angle - (FOV / 2.0);
 	col_id = 0;
-	for(int i = 0; i < NUM_RAYS; i++)
+	for(; col_id < NUM_RAYS; col_id++)
 	{
 		rays[col_id].angle = norm_angle(s_ang);
-		//horizontal intersection
+		/////////////////horizontal intersection////////////////////////
 		double xstep;
 		double ystep;
-		// printf("angle in deg %d\n", rad2deg(norm_angle(s_ang)));
-		long ix, iy;
+		long x_intercept, y_intercept;
 
-		iy = floor(p->y / T_SIZE) * T_SIZE; 
-		ix = p->x + (p->y - iy) / tan(rays[col_id].angle);
+		// printf("angle in deg %d\n", rad2deg(norm_angle(s_ang)));
+
+		rays[col_id].is_down = rays[col_id].angle > 0 && rays[col_id].angle < M_PI;
+		rays[col_id].is_up = !rays[col_id].is_down;
+		if((rays[col_id].angle < M_PI / 2) && (rays[col_id].angle > M_PI * 3/2))
+			rays[col_id].is_right = 1;
+		else
+			rays[col_id].is_right = 0;
+
+		rays[col_id].is_left = !rays[col_id].is_right;
+
+
+		y_intercept = floor(p->y / T_SIZE)* T_SIZE;
+		y_intercept += rays[col_id].is_down  * T_SIZE;
+		x_intercept = p->x + (y_intercept - p->y) / tan(rays[col_id].angle);
 
 		ystep = T_SIZE;
+		if(rays[col_id].is_up)
+			ystep *= -1 ;
 		xstep = T_SIZE / tan(rays[col_id].angle);
-
-		//vertical intersection
-		long ix, iy;
-
-		ix = (p->x / T_SIZE) * T_SIZE; 
-		ix = p->y + (p->x - ix) / tan(rays[col_id].angle);
-		printf("ver %f %f\n", ix, iy);
-		xstep = T_SIZE;
-		ystep = T_SIZE / tan(rays[col_id].angle);
-		//
-		col_id++;
+		if((rays[col_id].is_left && xstep > 0) || (rays[col_id].is_right && xstep < 0))
+			xstep *= -1;
+		printf(" deg %i %i %f %f\n", rad2deg(rays[col_id].angle),rays[col_id].is_right,xstep, ystep);
+		if(x_intercept > d->gdata->map_x * T_SIZE || y_intercept > d->gdata->map_y * T_SIZE || x_intercept < 0 || y_intercept < 0)
+		{	
+				x_intercept = (d->gdata->map_x * T_SIZE) / 2;
+				y_intercept = (d->gdata->map_y * T_SIZE) / 2;
+		}
+		while (d->gdata->map[y_intercept / T_SIZE][x_intercept/ T_SIZE] != '1')
+		{
+			x_intercept += xstep;
+			y_intercept += ystep;
+			if(x_intercept > d->gdata->map_x * T_SIZE || y_intercept > d->gdata->map_y * T_SIZE || x_intercept < 0 || y_intercept < 0)
+			{	
+				x_intercept = (d->gdata->map_x * T_SIZE) / 2;
+				y_intercept = (d->gdata->map_y * T_SIZE) / 2;
+				break;
+			}
+		}
+		//printf("%ld %ld\n", x_intercept, y_intercept);
+		draw_line(d, p->x, p->y, x_intercept, y_intercept);
 		break;
+
+
+
+
+
+		//////////////////////vertical intersection///////////////////////
+		//long x_intercept, y_intercept;
+
+		// x_intercept = (p->x / T_SIZE) * T_SIZE; 
+		// x_intercept = p->y + (p->x - x_intercept) / tan(rays[col_id].angle);
+		// //printf("ver %f %f\n", x_intercept, y_intercept);
+		// xstep = T_SIZE;
+		// ystep = T_SIZE / tan(rays[col_id].angle);
+		// //
+		// col_id++;
+		// break;
+		s_ang = s_ang + FOV / (NUM_RAYS - 1);
 	}
 
 
 
 
 	// (void)col_id;
-	// p = d->gdata->p;
-	// float incre = FOV / (NUM_RAYS - 1);
+	// p = d->gdata->p; 
 	// printf("t %f %f\n", incre * NUM_RAYS, FOV);
 	// 	//cast each ray
 	// 	draw_line(d, s_ang, p->x, p->y);
-	// 	s_ang = s_ang + incre;
 	
 }
-void draw_line(t_data *data, double angle, int x, int y)
+void draw_line(t_data *data, int x, int y, int x1, int y1)
+{
+	int dx;
+	int dy;
+	int sx, sy;
+	int p;
+	
+	dx = x1 - x;
+	dy = y1 - y;
+
+	sx = (dx >= 0) * 1 +  (dx < 0) * -1;
+	sy = (dy >= 0) * 1 +  (dy < 0) * -1;
+	dx = abs(dx); 
+	dy = abs(dy);
+    if(dx > dy)
+	{
+		p = 2 * dy - dx;
+		while (x != x1 )
+		{
+			my_mlx_pixel_put(data, x, y, 0xFF00FF);
+			x+=sx;
+			if(p >= 0)
+				{
+				y+=sy;
+				p-=2*dx;
+			}
+			p=p+2*dy;
+		}
+	}
+	else 
+	{
+		p = 2 * dx - dy; 
+		while (y != y1) 
+		{ 
+			my_mlx_pixel_put(data, x, y, 0xFF00FF);
+			y += sy;
+			if (p >= 0)
+			{
+				x += sx;
+				p -= 2 * dy;
+			}
+				p += 2 * dx; 
+		}
+	}
+}
+void draw_test(t_data *data, double angle, int x, int y)
 {
 	int dx;
 	int dy;
@@ -166,7 +251,7 @@ int update(t_data *d)
 {
 	draw_map(d->gdata, d);
 	draw_circle(d,  d->gdata->p->x , d->gdata->p->y, 4);
-	//draw_line(d,  d->gdata->p->rot_angle , d->gdata->p->x , d->gdata->p->y);
+	draw_test(d,  d->gdata->p->rot_angle , d->gdata->p->x , d->gdata->p->y);
 		// draw_line(d, M_PI /2, d->gdata->p->x , d->gdata->p->y);
 		// draw_line(d, 0      , d->gdata->p->x , d->gdata->p->y);
 		// draw_line(d, M_PI   , d->gdata->p->x , d->gdata->p->y);

@@ -57,7 +57,7 @@ void draw_map(t_gdata *d, t_data *data)
 		while(d->map[i][j])
 		{
 			if(d->map[i][j] == '1')
-				color_square(j, i, 0x00FF0000, data);
+				color_square(j, i, 0x00F2DDBA, data);
 			else if(d->map[i][j] == '0')
 				color_square(j, i, 0x00FFFFFF, data);
 			else if(d->map[i][j] == '6')

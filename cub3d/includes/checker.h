@@ -2,10 +2,20 @@
 #define CHECKER_H
 
 
+/*libs headers*/
+# include <stdio.h>
+# include <mlx.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <math.h>
+# include <stdbool.h>
+# include "../libft/libft.h"
+
 /*Macros*/
 #define W_WIDTH 640
 #define W_HEIGHT 480
-#define M_PI acos(-1.0)
+//#define M_PI acos(-1.0)
 #define T_SIZE 48
 #define FOV 60 * (M_PI / 180)
 #define WALL_STRIP_WIDTH 30
@@ -25,8 +35,10 @@ typedef struct s_ray
 	int		hit_x;
 	int		hit_y;
 	double	distance;
-	bool	is_down
+	bool	is_down;
 	bool	is_up;
+	bool	is_right;
+	bool	is_left;
 }				t_ray;
 
 typedef struct s_player {
@@ -67,14 +79,6 @@ typedef struct s_data {
 
 
 
-/*libs headers*/
-#include <stdio.h>
-#include <mlx.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "../libft/libft.h"
 
 /*Functions prototype*/
 int	find_longest_row(char **map, t_gdata *d);
@@ -82,7 +86,8 @@ int read_map(int fd, t_gdata *data);
 void draw_map(t_gdata *d, t_data *data);
 void free_arr(void **arr, int i);
 int	cross_win(t_data *d);
-void draw_line(t_data *data, double angle, int x, int y);
+void draw_line(t_data *data, int x, int y, int x1, int y1);
+void draw_test(t_data *data, double angle, int x, int y);
 void draw_circle(t_data *data, double cx, double cy, float radius);
 void	my_mlx_pixel_put(t_data *data, int x, int y, int color);
 void color_square(int x, int y, int color, t_data *d);
