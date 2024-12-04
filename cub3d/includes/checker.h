@@ -16,9 +16,9 @@
 #define W_WIDTH 640
 #define W_HEIGHT 480
 //#define M_PI acos(-1.0)
-#define T_SIZE 48
+#define T_SIZE 52
 #define FOV 60 * (M_PI / 180)
-#define WALL_STRIP_WIDTH 30
+#define WALL_STRIP_WIDTH 40
 #define NUM_RAYS W_WIDTH/WALL_STRIP_WIDTH
 /*struct*/
 typedef struct node

@@ -4,11 +4,11 @@ void init_player(t_gdata *data)
 {
 	data->p->y = data->st_pos[0] * T_SIZE + T_SIZE /2;
 	data->p->x = data->st_pos[1] * T_SIZE + T_SIZE /2;
-	data->p->move_speed = 3.0;//2 for linux post
+	data->p->move_speed = 2.0;//2 for linux post
 	data->p->radius = 3;
 	data->p->turn_dir = 0; //if turn left -1 right 1
 	data->p->walk_dir = 0; // move upword 1 move backward -1
-	data->p->rot_speed = 3 * M_PI / 180;
+	data->p->rot_speed = 2 * M_PI / 180;
 	data->p->rot_angle = M_PI / 2;
 }
 
@@ -41,6 +41,14 @@ int rad2deg(double angle)
 {
 	return((angle * 180) / M_PI);
 }
+double calc_dist(long x, long x1, long y , long y1)
+{
+	long dx, dy;
+
+	dx = x1 - x;
+	dy = y1 - y;
+	return(sqrt(dx * dx + dy * dy));
+}
 void draw_rays(t_data *d)
 {
 	int col_id;
@@ -52,22 +60,26 @@ void draw_rays(t_data *d)
 	col_id = 0;
 	for(; col_id < NUM_RAYS; col_id++)
 	{
+	
+		printf("deg %i %i\n", rad2deg(rays[col_id].angle), col_id);
 		rays[col_id].angle = norm_angle(s_ang);
+		rays[col_id].is_down = rays[col_id].angle > 0 && rays[col_id].angle < M_PI;
+		rays[col_id].is_up = !rays[col_id].is_down;
+		if((rays[col_id].angle > M_PI / 2) && (rays[col_id].angle < M_PI * 3/2))
+			rays[col_id].is_right = 0;
+		else
+			rays[col_id].is_right = 1;
+
+		rays[col_id].is_left = !rays[col_id].is_right;
+		////////////////////////////////////////////////////////////////
 		/////////////////horizontal intersection////////////////////////
+		////////////////////////////////////////////////////////////////
 		double xstep;
 		double ystep;
-		long x_intercept, y_intercept;
+		double x_intercept, y_intercept;
 
 		// printf("angle in deg %d\n", rad2deg(norm_angle(s_ang)));
 
-		rays[col_id].is_down = rays[col_id].angle > 0 && rays[col_id].angle < M_PI;
-		rays[col_id].is_up = !rays[col_id].is_down;
-		if((rays[col_id].angle < M_PI / 2) && (rays[col_id].angle > M_PI * 3/2))
-			rays[col_id].is_right = 1;
-		else
-			rays[col_id].is_right = 0;
-
-		rays[col_id].is_left = !rays[col_id].is_right;
 
 
 		y_intercept = floor(p->y / T_SIZE)* T_SIZE;
@@ -80,54 +92,77 @@ void draw_rays(t_data *d)
 		xstep = T_SIZE / tan(rays[col_id].angle);
 		if((rays[col_id].is_left && xstep > 0) || (rays[col_id].is_right && xstep < 0))
 			xstep *= -1;
-		printf(" deg %i %i %f %f\n", rad2deg(rays[col_id].angle),rays[col_id].is_right,xstep, ystep);
-		if(x_intercept > d->gdata->map_x * T_SIZE || y_intercept > d->gdata->map_y * T_SIZE || x_intercept < 0 || y_intercept < 0)
-		{	
-				x_intercept = (d->gdata->map_x * T_SIZE) / 2;
-				y_intercept = (d->gdata->map_y * T_SIZE) / 2;
-		}
-		while (d->gdata->map[y_intercept / T_SIZE][x_intercept/ T_SIZE] != '1')
+		//printf(" deg %i %i %f %f\n", rad2deg(rays[col_id].angle),rays[col_id].is_right,xstep, ystep);
+		//variable for checking if the intercption point is the wall or not and 
+		//adding the case if the ray is facing upword add 1 pixel to be able to check it evenly
+		bool found_horz_hit = false;
+		long horz_wall_x, horz_wall_y;
+		long check_x, check_y;
+
+		check_x = x_intercept;
+		check_y = y_intercept;
+		if(rays[col_id].is_up)
+			check_y -= 1;
+		while (check_x < d->gdata->map_x * T_SIZE && check_y < d->gdata->map_y * T_SIZE && check_x > 0 && check_y > 0)
 		{
-			x_intercept += xstep;
-			y_intercept += ystep;
-			if(x_intercept > d->gdata->map_x * T_SIZE || y_intercept > d->gdata->map_y * T_SIZE || x_intercept < 0 || y_intercept < 0)
-			{	
-				x_intercept = (d->gdata->map_x * T_SIZE) / 2;
-				y_intercept = (d->gdata->map_y * T_SIZE) / 2;
+			if((d->gdata->map[check_y / T_SIZE][check_x/ T_SIZE] == '1'))
+			{
+				horz_wall_x = check_x;
+				horz_wall_y = check_y;
+				found_horz_hit = true;
 				break;
 			}
+			check_x += xstep;
+			check_y += ystep;
 		}
-		//printf("%ld %ld\n", x_intercept, y_intercept);
-		draw_line(d, p->x, p->y, x_intercept, y_intercept);
-		break;
+		//break;
 
 
+		////////////////////////////////////////////////////////////////
+		/////////////////vertical intersection////////////////////////
+		////////////////////////////////////////////////////////////////
+		x_intercept =  floor(p->x / T_SIZE) * T_SIZE;
+		x_intercept += rays[col_id].is_right * T_SIZE;
+		y_intercept = p->y + (x_intercept - p->x) * tan(rays[col_id].angle);
 
-
-
-		//////////////////////vertical intersection///////////////////////
-		//long x_intercept, y_intercept;
-
-		// x_intercept = (p->x / T_SIZE) * T_SIZE; 
-		// x_intercept = p->y + (p->x - x_intercept) / tan(rays[col_id].angle);
-		// //printf("ver %f %f\n", x_intercept, y_intercept);
-		// xstep = T_SIZE;
-		// ystep = T_SIZE / tan(rays[col_id].angle);
-		// //
-		// col_id++;
-		// break;
+		xstep = T_SIZE;
+		if(rays[col_id].is_left)
+			xstep *= -1;
+		ystep = T_SIZE * tan(rays[col_id].angle);
+		if((rays[col_id].is_up && ystep > 0) || (rays[col_id].is_down && ystep < 0))
+			ystep *= -1;
+		bool found_vert_hit = false;
+		long vert_wall_x, vert_wall_y;
+		//long check_x, check_y;
+		(void)vert_wall_x;
+		(void) vert_wall_y;
+		(void)found_vert_hit;
+		check_x = x_intercept;
+		check_y = y_intercept;
+		if(rays[col_id].is_left)
+			check_x -= 1;
+		while (check_x < d->gdata->map_x * T_SIZE && check_y < d->gdata->map_y * T_SIZE && check_x > 0 && check_y > 0)
+		{
+			if((d->gdata->map[check_y / T_SIZE][check_x/ T_SIZE] == '1'))
+			{
+				vert_wall_x = check_x;
+				vert_wall_y = check_y;
+				found_vert_hit = true;
+				break;
+			}
+			check_x += xstep;
+			check_y += ystep;
+		}
+		//todo make two var if the hit bool is true set the distancd accordernly if not its 0 then check if the distance is greaster than 0 then redner the line
+		
+		if(found_vert_hit &&  (calc_dist(p->x, vert_wall_x, p->y, vert_wall_y) < calc_dist(p->x, horz_wall_x, p->y, horz_wall_y)) )
+				draw_line(d, p->x, p->y, vert_wall_x, vert_wall_y);
+		else if(found_horz_hit)
+				draw_line(d, p->x, p->y, horz_wall_x, horz_wall_y);
+		//remove the variable and use the structs one's
+		//todo romove the rendering and render in the while loop
 		s_ang = s_ang + FOV / (NUM_RAYS - 1);
 	}
-
-
-
-
-	// (void)col_id;
-	// p = d->gdata->p; 
-	// printf("t %f %f\n", incre * NUM_RAYS, FOV);
-	// 	//cast each ray
-	// 	draw_line(d, s_ang, p->x, p->y);
-	
 }
 void draw_line(t_data *data, int x, int y, int x1, int y1)
 {
