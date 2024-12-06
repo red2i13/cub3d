@@ -15,16 +15,26 @@ void	my_mlx_pixel_put(t_data *data, int x, int y, int color)
 	dst = data->addr + (y * data->line_length + x * (data->bits_per_pixel / 8));
 	*(unsigned int*)dst = color;
 }
+void color_rect(int x, int y, int width, int height, int color, t_data *d)
+{
+	for(int i = 0; i < width; i++)
+	{
+		for(int j = 0; j < height; j++)
+		{
+			my_mlx_pixel_put(d, x + i, y + j, color);
+		}
+	}
+}
 void color_square(int x, int y, int color, t_data *d)
 {
-	for(int i = 0; i < T_SIZE; i++)
+	for(int i = 0; i < T_SIZE * MINIMAP_SCALE_F; i++)
 	{
-		for(int j = 0; j < T_SIZE; j++)
+		for(int j = 0; j < T_SIZE * MINIMAP_SCALE_F; j++)
 		{
-			if(i == 0 || j == 0 || i == T_SIZE -1 || j == T_SIZE -1)
-				my_mlx_pixel_put(d, x * T_SIZE + i, y * T_SIZE + j, 0x000000);
+			if(i == 0 || j == 0 || i == T_SIZE * MINIMAP_SCALE_F -1 || j == T_SIZE * MINIMAP_SCALE_F -1)
+				my_mlx_pixel_put(d, x * T_SIZE * MINIMAP_SCALE_F + i, y * T_SIZE * MINIMAP_SCALE_F + j, 0x000000);
 			else
-				my_mlx_pixel_put(d, x * T_SIZE + i, y * T_SIZE + j, color);
+				my_mlx_pixel_put(d, x * T_SIZE * MINIMAP_SCALE_F + i, y * T_SIZE * MINIMAP_SCALE_F + j, color);
 		}
 	}
 }

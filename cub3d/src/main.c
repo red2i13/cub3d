@@ -4,11 +4,11 @@ void init_player(t_gdata *data)
 {
 	data->p->y = data->st_pos[0] * T_SIZE + T_SIZE /2;
 	data->p->x = data->st_pos[1] * T_SIZE + T_SIZE /2;
-	data->p->move_speed = 2.0;//2 for linux post
+	data->p->move_speed = 1.0;//2 for linux post
 	data->p->radius = 3;
 	data->p->turn_dir = 0; //if turn left -1 right 1
 	data->p->walk_dir = 0; // move upword 1 move backward -1
-	data->p->rot_speed = 2 * M_PI / 180;
+	data->p->rot_speed = 1 * M_PI / 180;
 	data->p->rot_angle = M_PI / 2;
 }
 
@@ -54,14 +54,16 @@ void draw_rays(t_data *d)
 	int col_id;
 	t_player *p;
 	t_ray rays[NUM_RAYS];
-	
+	bool found_vert_hit = false;
+	bool found_horz_hit = false;
 	p = d->gdata->p;
 	float s_ang = p->rot_angle - (FOV / 2.0);
 	col_id = 0;
+	d->gdata->p->rays = rays;
 	for(; col_id < NUM_RAYS; col_id++)
 	{
-	
-		printf("deg %i %i\n", rad2deg(rays[col_id].angle), col_id);
+		found_horz_hit = false;
+		found_vert_hit = false;
 		rays[col_id].angle = norm_angle(s_ang);
 		rays[col_id].is_down = rays[col_id].angle > 0 && rays[col_id].angle < M_PI;
 		rays[col_id].is_up = !rays[col_id].is_down;
@@ -78,10 +80,6 @@ void draw_rays(t_data *d)
 		double ystep;
 		double x_intercept, y_intercept;
 
-		// printf("angle in deg %d\n", rad2deg(norm_angle(s_ang)));
-
-
-
 		y_intercept = floor(p->y / T_SIZE)* T_SIZE;
 		y_intercept += rays[col_id].is_down  * T_SIZE;
 		x_intercept = p->x + (y_intercept - p->y) / tan(rays[col_id].angle);
@@ -92,20 +90,17 @@ void draw_rays(t_data *d)
 		xstep = T_SIZE / tan(rays[col_id].angle);
 		if((rays[col_id].is_left && xstep > 0) || (rays[col_id].is_right && xstep < 0))
 			xstep *= -1;
-		//printf(" deg %i %i %f %f\n", rad2deg(rays[col_id].angle),rays[col_id].is_right,xstep, ystep);
 		//variable for checking if the intercption point is the wall or not and 
 		//adding the case if the ray is facing upword add 1 pixel to be able to check it evenly
-		bool found_horz_hit = false;
 		long horz_wall_x, horz_wall_y;
 		long check_x, check_y;
 
 		check_x = x_intercept;
 		check_y = y_intercept;
-		if(rays[col_id].is_up)
-			check_y -= 1;
 		while (check_x < d->gdata->map_x * T_SIZE && check_y < d->gdata->map_y * T_SIZE && check_x > 0 && check_y > 0)
 		{
-			if((d->gdata->map[check_y / T_SIZE][check_x/ T_SIZE] == '1'))
+			int test1 = check_y - (rays[col_id].is_up ? 1 : 0);
+			if((d->gdata->map[test1 / T_SIZE][check_x/ T_SIZE] == '1'))
 			{
 				horz_wall_x = check_x;
 				horz_wall_y = check_y;
@@ -131,19 +126,16 @@ void draw_rays(t_data *d)
 		ystep = T_SIZE * tan(rays[col_id].angle);
 		if((rays[col_id].is_up && ystep > 0) || (rays[col_id].is_down && ystep < 0))
 			ystep *= -1;
-		bool found_vert_hit = false;
 		long vert_wall_x, vert_wall_y;
 		//long check_x, check_y;
-		(void)vert_wall_x;
-		(void) vert_wall_y;
-		(void)found_vert_hit;
+	
 		check_x = x_intercept;
 		check_y = y_intercept;
-		if(rays[col_id].is_left)
-			check_x -= 1;
+	
 		while (check_x < d->gdata->map_x * T_SIZE && check_y < d->gdata->map_y * T_SIZE && check_x > 0 && check_y > 0)
 		{
-			if((d->gdata->map[check_y / T_SIZE][check_x/ T_SIZE] == '1'))
+			int test = check_x - (rays[col_id].is_left ? 1 : 0);
+			if((d->gdata->map[check_y / T_SIZE][test/ T_SIZE] == '1'))
 			{
 				vert_wall_x = check_x;
 				vert_wall_y = check_y;
@@ -154,16 +146,60 @@ void draw_rays(t_data *d)
 			check_y += ystep;
 		}
 		//todo make two var if the hit bool is true set the distancd accordernly if not its 0 then check if the distance is greaster than 0 then redner the line
+		double dst_vert;
+		double dst_horz;
+
+		dst_vert = (found_vert_hit) * calc_dist(p->x, vert_wall_x, p->y, vert_wall_y) + !(found_vert_hit) * __INT_MAX__;
+		dst_horz = (found_horz_hit) * calc_dist(p->x, horz_wall_x, p->y, horz_wall_y) + !(found_horz_hit) * __INT_MAX__;;
+	
+		rays[col_id].hit_x = (dst_horz < dst_vert) * horz_wall_x +  (dst_horz > dst_vert) * vert_wall_x;
+		rays[col_id].hit_y = (dst_horz < dst_vert) * horz_wall_y +  (dst_horz > dst_vert) * vert_wall_y;
+		rays[col_id].distance = (dst_horz < dst_vert) * dst_horz +  (dst_horz > dst_vert) * dst_vert;
 		
-		if(found_vert_hit &&  (calc_dist(p->x, vert_wall_x, p->y, vert_wall_y) < calc_dist(p->x, horz_wall_x, p->y, horz_wall_y)) )
-				draw_line(d, p->x, p->y, vert_wall_x, vert_wall_y);
-		else if(found_horz_hit)
-				draw_line(d, p->x, p->y, horz_wall_x, horz_wall_y);
-		//remove the variable and use the structs one's
 		//todo romove the rendering and render in the while loop
-		s_ang = s_ang + FOV / (NUM_RAYS - 1);
+		//printf("deg %i %i h:%i v:%i\n", rad2deg(rays[col_id].angle), col_id, found_horz_hit, found_vert_hit);
+		if(found_vert_hit &&  (dst_vert < dst_horz) )
+		{
+			draw_line(d, p->x * MINIMAP_SCALE_F,
+			p->y * MINIMAP_SCALE_F,
+			vert_wall_x * MINIMAP_SCALE_F,
+			vert_wall_y * MINIMAP_SCALE_F);
+		}
+		else if(found_horz_hit && dst_horz < dst_vert)
+		{
+			draw_line(d, p->x * MINIMAP_SCALE_F,
+			 p->y * MINIMAP_SCALE_F,
+			 horz_wall_x * MINIMAP_SCALE_F,
+			 horz_wall_y * MINIMAP_SCALE_F)
+			;
+		}
+		s_ang += FOV / (NUM_RAYS - 1);
 	}
 }
+void render3dprojectd_walls(t_data *d)
+{
+	t_ray *rays_arr;
+	t_ray ray;
+	double ray_dist;
+	double dist_projection_plane;
+	double wall_stripe_height;
+
+	rays_arr = d->gdata->p->rays;
+	for(int i = 0; i < NUM_RAYS; i++)
+	{
+		ray = rays_arr[i];
+		ray_dist = ray.distance;
+		// dist to the projection plane
+		dist_projection_plane = (W_WIDTH / 2) / tan (FOV / 2);
+		//wall heigth of every stripe
+		wall_stripe_height = (T_SIZE / ray_dist) * dist_projection_plane;
+		color_rect(i * WALL_STRIP_WIDTH,
+					(W_HEIGHT / 2) - (wall_stripe_height / 2),
+					WALL_STRIP_WIDTH,wall_stripe_height, 0x0003A9FC, d);
+		sleep(1);
+	}
+}
+
 void draw_line(t_data *data, int x, int y, int x1, int y1)
 {
 	int dx;
@@ -285,14 +321,13 @@ int key_press(int keycode, t_player *p)
 int update(t_data *d)
 {
 	draw_map(d->gdata, d);
-	draw_circle(d,  d->gdata->p->x , d->gdata->p->y, 4);
-	draw_test(d,  d->gdata->p->rot_angle , d->gdata->p->x , d->gdata->p->y);
-		// draw_line(d, M_PI /2, d->gdata->p->x , d->gdata->p->y);
-		// draw_line(d, 0      , d->gdata->p->x , d->gdata->p->y);
-		// draw_line(d, M_PI   , d->gdata->p->x , d->gdata->p->y);
-
+	draw_circle(d,  d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F, 4);
+	draw_test(d,  d->gdata->p->rot_angle , d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F);
+	//rename to calc_rays
 	draw_rays(d);
-
+	//TODO : draw the 3d projected wall strips
+	render3dprojectd_walls(d);
+	// printf("distance is ok %f\n", d->gdata->p->rays[2].distance);
 
 	//make a function for the movement
 	d->gdata->p->rot_angle += d->gdata->p->turn_dir * d->gdata->p->rot_speed;
@@ -322,7 +357,7 @@ int main(int ac, char **av)
 	read_map(open(av[1], 0644), &st);
 	init_player(&st);
 	d.s = mlx_init();
-	d.win = mlx_new_window(d.s,  st.map_x * T_SIZE, st.map_y * T_SIZE, "Cub3d by ysahraou and rbenmakh");
+	d.win = mlx_new_window(d.s,  W_WIDTH, W_HEIGHT, "Cub3d by ysahraou and rbenmakh");
 	d.img = mlx_new_image(d.s, st.map_x * T_SIZE, st.map_y * T_SIZE);
 	d.addr = mlx_get_data_addr(d.img, &d.bits_per_pixel, &d.line_length, &d.endian);
 	d.gdata = &st;
