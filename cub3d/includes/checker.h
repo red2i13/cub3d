@@ -1,7 +1,48 @@
 #ifndef CHECKER_H
 #define CHECKER_H
 
+// Basic Colors
+#define BLACK       0x000000
+#define WHITE       0xFFFFFF
+#define RED         0xFF0000
+#define GREEN       0x00FF00
+#define BLUE        0x0000FF
 
+// Shades of Red
+#define DARK_RED    0x8B0000
+#define LIGHT_RED   0xFF6347
+
+// Shades of Green
+#define DARK_GREEN  0x006400
+#define LIME_GREEN  0x32CD32
+
+// Shades of Blue
+#define DARK_BLUE   0x00008B
+#define NAVY        0x000080
+#define SKY_BLUE    0x87CEEB
+
+// Yellows and Oranges
+#define YELLOW      0xFFFF00
+#define GOLD        0xFFD700
+#define ORANGE      0xFFA500
+
+// Purples and Magentas
+#define PURPLE      0x800080
+#define MAGENTA     0xFF00FF
+#define VIOLET      0x9400D3
+
+// Cyan and Teals
+#define CYAN        0x00FFFF
+#define TEAL        0x008080
+
+// Browns
+#define BROWN       0xA52A2A
+#define CHOCOLATE   0xD2691E
+
+// Grays
+#define GRAY        0x808080
+#define LIGHT_GRAY  0xD3D3D3
+#define DARK_GRAY   0x404040
 /*libs headers*/
 # include <stdio.h>
 # include <mlx.h>
@@ -16,11 +57,13 @@
 #define W_WIDTH 640
 #define W_HEIGHT 480
 //#define M_PI acos(-1.0)
-#define T_SIZE 120
+#define T_SIZE 64
 #define FOV 60 * (M_PI / 180)
-#define WALL_STRIP_WIDTH 20
+#define WALL_STRIP_WIDTH 8
 #define NUM_RAYS W_WIDTH/WALL_STRIP_WIDTH
-#define MINIMAP_SCALE_F 0.2
+// #define MINIMAP_SCALE_F 0.2
+#define MINIMAP_SCALE_F 0.6
+
 /*struct*/
 typedef struct node
 {
@@ -50,8 +93,8 @@ typedef struct s_player {
 	int walk_dir;
 	double rot_angle;
 	double move_speed;
-	float rot_speed;
-	t_ray *rays;
+	double rot_speed;
+	t_ray *r;
 
 }				t_player;
 
@@ -86,6 +129,7 @@ typedef struct s_data {
 /*Functions prototype*/
 int		find_longest_row(char **map, t_gdata *d);
 int		read_map(int fd, t_gdata *data);
+void clear_image(t_data *d);
 void	draw_map(t_gdata *d, t_data *data);
 void	free_arr(void **arr, int i);
 int		cross_win(t_data *d);

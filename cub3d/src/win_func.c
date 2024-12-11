@@ -8,20 +8,40 @@ int	cross_win(t_data *d)
 	free(d->s);
 	exit(0);
 }
+void clear_image(t_data *d)
+{
+	for(int i = 0; i < W_HEIGHT; i++)
+	{
+		for(int j = 0; j < W_WIDTH; j++)
+		{
+			my_mlx_pixel_put(d, j, i, 0x000000);
+		}
+	}	
+}
 void	my_mlx_pixel_put(t_data *data, int x, int y, int color)
 {
 	char	*dst;
+	if(x < 0 || y < 0 || x > W_WIDTH || y > W_HEIGHT)
+		return;
+	printf("mlx  %d %d x %d y %d\n",W_WIDTH, W_HEIGHT, x, y);
 
 	dst = data->addr + (y * data->line_length + x * (data->bits_per_pixel / 8));
+	if (dst < data->addr || dst >= data->addr + (data->line_length * 480)) 
+		return;
 	*(unsigned int*)dst = color;
 }
 void color_rect(int x, int y, int width, int height, int color, t_data *d)
 {
-	for(int i = 0; i < width; i++)
+	if(x < 0 || y < 0)
+		return;
+	// printf("%i %i width %i height %i\n", x, y, width, height);
+	for(int i = 0; i < height; i++)
 	{
-		for(int j = 0; j < height; j++)
+		for(int j = 0; j < width; j++)
 		{
-			my_mlx_pixel_put(d, x + i, y + j, color);
+			my_mlx_pixel_put(d, x + j, y + i, color);
+			// mlx_pixel_put(d->s, d->win, x + j, y + i, color);
+
 		}
 	}
 }

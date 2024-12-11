@@ -4,11 +4,11 @@ void init_player(t_gdata *data)
 {
 	data->p->y = data->st_pos[0] * T_SIZE + T_SIZE /2;
 	data->p->x = data->st_pos[1] * T_SIZE + T_SIZE /2;
-	data->p->move_speed = 1.0;//2 for linux post
+	data->p->move_speed = 2.0;//2 for linux post
 	data->p->radius = 3;
 	data->p->turn_dir = 0; //if turn left -1 right 1
 	data->p->walk_dir = 0; // move upword 1 move backward -1
-	data->p->rot_speed = 1 * M_PI / 180;
+	data->p->rot_speed = 3 * M_PI / 180;
 	data->p->rot_angle = M_PI / 2;
 }
 
@@ -28,7 +28,7 @@ void draw_circle(t_data *data, double cx, double cy, float radius)
 		}
 		y++;
 	}
-	mlx_put_image_to_window(data->s, data->win, data->img, 0, 0);
+	// mlx_put_image_to_window(data->s, data->win, data->img, 0, 0);
 }
 double norm_angle(double angle)
 {
@@ -37,7 +37,7 @@ double norm_angle(double angle)
 		angle = angle + (2 * M_PI);
 	return(angle);
 }
-int rad2deg(double angle)
+double rad2deg(double angle)
 {
 	return((angle * 180) / M_PI);
 }
@@ -49,23 +49,28 @@ double calc_dist(long x, long x1, long y , long y1)
 	dy = y1 - y;
 	return(sqrt(dx * dx + dy * dy));
 }
-void draw_rays(t_data *d)
+void calc_rays(t_data *d)
 {
 	int col_id;
 	t_player *p;
-	t_ray rays[NUM_RAYS];
+	t_ray *rays;
+
+	rays = NULL;
+	rays = malloc(sizeof(t_ray) * NUM_RAYS);
+	d->gdata->p->r = rays;
 	bool found_vert_hit = false;
 	bool found_horz_hit = false;
 	p = d->gdata->p;
-	float s_ang = p->rot_angle - (FOV / 2.0);
+	double s_ang = p->rot_angle - (FOV / 2.0);
 	col_id = 0;
-	d->gdata->p->rays = rays;
 	for(; col_id < NUM_RAYS; col_id++)
 	{
+		rays[col_id].column_id = col_id;
 		found_horz_hit = false;
 		found_vert_hit = false;
 		rays[col_id].angle = norm_angle(s_ang);
-		rays[col_id].is_down = rays[col_id].angle > 0 && rays[col_id].angle < M_PI;
+		// printf("debug angle %f\n", rad2deg(rays[col_id].angle));
+		rays[col_id].is_down = (rays[col_id].angle > 0) && (rays[col_id].angle < M_PI);
 		rays[col_id].is_up = !rays[col_id].is_down;
 		if((rays[col_id].angle > M_PI / 2) && (rays[col_id].angle < M_PI * 3/2))
 			rays[col_id].is_right = 0;
@@ -110,9 +115,6 @@ void draw_rays(t_data *d)
 			check_x += xstep;
 			check_y += ystep;
 		}
-		//break;
-
-
 		////////////////////////////////////////////////////////////////
 		/////////////////vertical intersection////////////////////////
 		////////////////////////////////////////////////////////////////
@@ -149,54 +151,80 @@ void draw_rays(t_data *d)
 		double dst_vert;
 		double dst_horz;
 
-		dst_vert = (found_vert_hit) * calc_dist(p->x, vert_wall_x, p->y, vert_wall_y) + !(found_vert_hit) * __INT_MAX__;
-		dst_horz = (found_horz_hit) * calc_dist(p->x, horz_wall_x, p->y, horz_wall_y) + !(found_horz_hit) * __INT_MAX__;;
-	
-		rays[col_id].hit_x = (dst_horz < dst_vert) * horz_wall_x +  (dst_horz > dst_vert) * vert_wall_x;
-		rays[col_id].hit_y = (dst_horz < dst_vert) * horz_wall_y +  (dst_horz > dst_vert) * vert_wall_y;
-		rays[col_id].distance = (dst_horz < dst_vert) * dst_horz +  (dst_horz > dst_vert) * dst_vert;
+		dst_horz = 0;
+		dst_vert = 0;
+		if(found_vert_hit) 
+		{
+			dst_vert = calc_dist(p->x, vert_wall_x, p->y, vert_wall_y);
+			dst_horz = __INT_MAX__;
+		}	
+		if(found_horz_hit){
+			dst_horz = calc_dist(p->x, horz_wall_x, p->y, horz_wall_y);
+			if(!dst_vert)
+				dst_vert = __INT_MAX__;
+		}
+		// rays[col_id].hit_y = (dst_horz < dst_vert) * horz_wall_y +  (dst_horz > dst_vert) * vert_wall_y;
+		// rays[col_id].hit_x = (dst_horz < dst_vert) * horz_wall_x +  (dst_horz > dst_vert) * vert_wall_x;
+		// rays[col_id].distance = (dst_horz < dst_vert) * dst_horz +  (dst_horz > dst_vert) * dst_vert;
 		
 		//todo romove the rendering and render in the while loop
-		//printf("deg %i %i h:%i v:%i\n", rad2deg(rays[col_id].angle), col_id, found_horz_hit, found_vert_hit);
+		// printf("deg %f col %i h:%i v:%i d_vert %f d_hor %f\n", rad2deg(rays[col_id].angle), col_id, found_horz_hit, found_vert_hit, dst_vert, dst_horz);
 		if(found_vert_hit &&  (dst_vert < dst_horz) )
 		{
-			draw_line(d, p->x * MINIMAP_SCALE_F,
-			p->y * MINIMAP_SCALE_F,
-			vert_wall_x * MINIMAP_SCALE_F,
-			vert_wall_y * MINIMAP_SCALE_F);
+			// draw_line(d, p->x * MINIMAP_SCALE_F,
+			// p->y * MINIMAP_SCALE_F,
+			// vert_wall_x * MINIMAP_SCALE_F,
+			// vert_wall_y * MINIMAP_SCALE_F);
+			
+			rays[col_id].hit_y = vert_wall_y;
+			rays[col_id].hit_x = vert_wall_x;
+			rays[col_id].distance = dst_vert;
+		
 		}
 		else if(found_horz_hit && dst_horz < dst_vert)
 		{
-			draw_line(d, p->x * MINIMAP_SCALE_F,
-			 p->y * MINIMAP_SCALE_F,
-			 horz_wall_x * MINIMAP_SCALE_F,
-			 horz_wall_y * MINIMAP_SCALE_F)
-			;
+			// draw_line(d, p->x * MINIMAP_SCALE_F,
+			//  p->y * MINIMAP_SCALE_F,
+			//  horz_wall_x * MINIMAP_SCALE_F,
+			//  horz_wall_y * MINIMAP_SCALE_F)
+			// ;
+			rays[col_id].hit_y = horz_wall_y;
+			rays[col_id].hit_x = horz_wall_x;
+			rays[col_id].distance = dst_horz;
+		
 		}
+		// if(!rays[col_id]. distance)
+		// {
+		// 	printf("iam hers %d\n", rays[col_id].column_id);
+		// }
+
 		s_ang += FOV / (NUM_RAYS - 1);
 	}
+	// exit(3);
 }
 void render3dprojectd_walls(t_data *d)
 {
-	t_ray *rays_arr;
 	t_ray ray;
 	double ray_dist;
 	double dist_projection_plane;
 	double wall_stripe_height;
 
-	rays_arr = d->gdata->p->rays;
 	for(int i = 0; i < NUM_RAYS; i++)
 	{
-		ray = rays_arr[i];
+		ray = d->gdata->p->r[i];
 		ray_dist = ray.distance;
+		// printf("ray dist %f %f\n", ray_dist, rad2deg(d->gdata->p->r[i].angle));
+		// if(ray_dist == 0 || ray_dist < 0)
+		// 	continue;
+		// printf("debug %f\n", ray_dist);
 		// dist to the projection plane
 		dist_projection_plane = (W_WIDTH / 2) / tan (FOV / 2);
 		//wall heigth of every stripe
-		wall_stripe_height = (T_SIZE / ray_dist) * dist_projection_plane;
+		wall_stripe_height = ((double)T_SIZE / (double)ray_dist) * dist_projection_plane;
+		// printf("fafa  %i %f %f \n", ray_dist, wall_stripe_height, dist_projection_plane);
 		color_rect(i * WALL_STRIP_WIDTH,
 					(W_HEIGHT / 2) - (wall_stripe_height / 2),
-					WALL_STRIP_WIDTH,wall_stripe_height, 0x0003A9FC, d);
-		sleep(1);
+					WALL_STRIP_WIDTH,wall_stripe_height, VIOLET, d);
 	}
 }
 
@@ -245,6 +273,7 @@ void draw_line(t_data *data, int x, int y, int x1, int y1)
 		}
 	}
 }
+
 void draw_test(t_data *data, double angle, int x, int y)
 {
 	int dx;
@@ -253,8 +282,8 @@ void draw_test(t_data *data, double angle, int x, int y)
 	int sx, sy;
 	int p;
 	
-	dx = (int)(cos(angle) * 30);
-	dy = (int)(sin(angle) * 30);
+	dx = (int)(cos(angle) * 12);
+	dy = (int)(sin(angle) * 12);
 	x1 = x + dx;
 	y1 = y + dy;
 	sx = (dx >= 0) * 1 +  (dx < 0) * -1;
@@ -320,17 +349,20 @@ int key_press(int keycode, t_player *p)
 
 int update(t_data *d)
 {
-	draw_map(d->gdata, d);
-	draw_circle(d,  d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F, 4);
-	draw_test(d,  d->gdata->p->rot_angle , d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F);
-	//rename to calc_rays
-	draw_rays(d);
-	//TODO : draw the 3d projected wall strips
+
+	//draw_map(d->gdata, d);
+	//draw_circle(d,  d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F, 4);
+	//draw_test(d,  d->gdata->p->rot_angle , d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F);
+	calc_rays(d);
+
+	// color_rect(100, 100, 50, 75, 0x00FF00, d);
+	clear_image(d);
 	render3dprojectd_walls(d);
-	// printf("distance is ok %f\n", d->gdata->p->rays[2].distance);
+	mlx_put_image_to_window(d->s, d->win, d->img, 0, 0);
 
 	//make a function for the movement
 	d->gdata->p->rot_angle += d->gdata->p->turn_dir * d->gdata->p->rot_speed;
+	// printf("angle :%f\n", rad2deg(d->gdata->p->rot_angle));
 	int move_step;
 	move_step = d->gdata->p->move_speed * d->gdata->p->walk_dir;
 	int sx, sy;
