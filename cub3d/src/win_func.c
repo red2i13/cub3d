@@ -23,7 +23,6 @@ void	my_mlx_pixel_put(t_data *data, int x, int y, int color)
 	char	*dst;
 	if(x < 0 || y < 0 || x > W_WIDTH || y > W_HEIGHT)
 		return;
-	printf("mlx  %d %d x %d y %d\n",W_WIDTH, W_HEIGHT, x, y);
 
 	dst = data->addr + (y * data->line_length + x * (data->bits_per_pixel / 8));
 	if (dst < data->addr || dst >= data->addr + (data->line_length * 480)) 

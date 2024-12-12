@@ -59,10 +59,10 @@
 //#define M_PI acos(-1.0)
 #define T_SIZE 64
 #define FOV 60 * (M_PI / 180)
-#define WALL_STRIP_WIDTH 8
+#define WALL_STRIP_WIDTH 4
 #define NUM_RAYS W_WIDTH/WALL_STRIP_WIDTH
-// #define MINIMAP_SCALE_F 0.2
-#define MINIMAP_SCALE_F 0.6
+#define MINIMAP_SCALE_F 0.2
+// #define MINIMAP_SCALE_F 1.8
 
 /*struct*/
 typedef struct node
