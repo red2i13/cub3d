@@ -213,16 +213,25 @@ void render3dprojectd_walls(t_data *d)
 	{
 		ray = d->gdata->p->r[i];
 		ray_dist = ray.distance;
+
+		// change the ray distance to the corrected one to avoid the fish bowl effetct
+		// corrected_dst = ray_dist * cos(ray.angle - p->angle)
 		// printf("ray dist %f %f\n", ray_dist, rad2deg(d->gdata->p->r[i].angle));
 		// if(ray_dist == 0 || ray_dist < 0)
 		// 	continue;
 		// dist to the projection plane
-		dist_projection_plane = (W_WIDTH / 2) / tan (FOV / 2);
+		double correctd_dst = ray_dist *  cos(d->gdata->p->r[i].angle - d->gdata->p->rot_angle);
+		dist_projection_plane = (W_WIDTH / 2) / tan(FOV / 2);
 		//wall heigth of every stripe
-		wall_stripe_height = ((double)T_SIZE / (double)ray_dist) * dist_projection_plane;
+		wall_stripe_height = ((double)T_SIZE / (double)correctd_dst) * dist_projection_plane;
+		printf("wall h %f\n", wall_stripe_height);
+		if(wall_stripe_height > W_HEIGHT)
+			wall_stripe_height = W_HEIGHT;
+		int color = VIOLET;
+		color = darken_color(VIOLET, 1  + correctd_dst/1000 );
 		color_rect(i * WALL_STRIP_WIDTH,
 					(W_HEIGHT / 2) - (wall_stripe_height / 2),
-					WALL_STRIP_WIDTH,wall_stripe_height, VIOLET, d);
+					WALL_STRIP_WIDTH,wall_stripe_height, color, d);
 	}
 }
 
@@ -348,12 +357,16 @@ int key_press(int keycode, t_player *p)
 int update(t_data *d)
 {
 
+	clear_image(d);
+	// draw_test(d,  d->gdata->p->rot_angle , d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F);
+	// for(int i = 0; i < NUM_RAYS; i++)
+	// {
+	// 	printf("col %d dist %f \n", d->gdata->p->r[i].column_id, d->gdata->p->r[i].distance);
+	// }
+	render3dprojectd_walls(d);
 	draw_map(d->gdata, d);
 	draw_circle(d,  d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F, 4);
-	// draw_test(d,  d->gdata->p->rot_angle , d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F);
-	clear_image(d);
 	calc_rays(d);
-	render3dprojectd_walls(d);
 	mlx_put_image_to_window(d->s, d->win, d->img, 0, 0);
 
 	//make a function for the movement
@@ -363,7 +376,7 @@ int update(t_data *d)
 	int sx, sy;
 	sx = round(move_step * cos(d->gdata->p->rot_angle));
 	sy = round(move_step * sin(d->gdata->p->rot_angle));
-
+	// printf("curr %c %d %d\n", d->gdata->map[d->gdata->p->y/T_SIZE][d->gdata->p->x/T_SIZE ],sx, sy);
 	d->gdata->p->x += sx *(d->gdata->map[d->gdata->p->y/T_SIZE][(d->gdata->p->x + sx)/T_SIZE ] != '1');
 	d->gdata->p->y += sy *(d->gdata->map[(d->gdata->p->y + sy)/T_SIZE ][d->gdata->p->x/T_SIZE] != '1');
 	//
@@ -388,7 +401,6 @@ int main(int ac, char **av)
 	d.img = mlx_new_image(d.s, W_WIDTH, W_HEIGHT);
 	d.addr = mlx_get_data_addr(d.img, &d.bits_per_pixel, &d.line_length, &d.endian);
 	d.gdata = &st;
-
 
 	mlx_hook(d.win, 2, 1<<0, key_press, &p);
 	mlx_hook(d.win, 3, 1<< 1, key_release, &p);

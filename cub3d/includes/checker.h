@@ -59,7 +59,7 @@
 //#define M_PI acos(-1.0)
 #define T_SIZE 64
 #define FOV 60 * (M_PI / 180)
-#define WALL_STRIP_WIDTH 4
+#define WALL_STRIP_WIDTH 8
 #define NUM_RAYS W_WIDTH/WALL_STRIP_WIDTH
 #define MINIMAP_SCALE_F 0.2
 // #define MINIMAP_SCALE_F 1.8
@@ -123,23 +123,22 @@ typedef struct s_data {
 	int		endian;
 }				t_data;
 
-
-
-
 /*Functions prototype*/
 int		find_longest_row(char **map, t_gdata *d);
 int		read_map(int fd, t_gdata *data);
-void clear_image(t_data *d);
+int		bfs(int st_x, int st_y, t_gdata *d, t_data *data);
+int		cross_win(t_data *d);
+int     key_release(int keycode, t_player *p);
+int 	darken_color(int original_color, float darkness_factor);
+int 	create_trgb(int t, int r, int g, int b);
+void 	clear_image(t_data *d);
 void	draw_map(t_gdata *d, t_data *data);
 void	free_arr(void **arr, int i);
-int		cross_win(t_data *d);
 void	draw_line(t_data *data, int x, int y, int x1, int y1);
 void	draw_test(t_data *data, double angle, int x, int y);
 void	draw_circle(t_data *data, double cx, double cy, float radius);
 void	my_mlx_pixel_put(t_data *data, int x, int y, int color);
 void 	color_square(int x, int y, int color, t_data *d);
-int     key_release(int keycode, t_player *p);
-void color_rect(int x, int y, int width, int height, int color, t_data *d);
-void draw_map(t_gdata *d, t_data *data);
-int	bfs(int st_x, int st_y, t_gdata *d, t_data *data);
+void 	color_rect(int x, int y, int width, int height, int color, t_data *d);
+void 	draw_map(t_gdata *d, t_data *data);
 #endif

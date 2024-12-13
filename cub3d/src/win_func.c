@@ -44,6 +44,26 @@ void color_rect(int x, int y, int width, int height, int color, t_data *d)
 		}
 	}
 }
+int darken_color(int original_color, float darkness_factor) 
+{
+    // Extract individual color components
+    int t = (original_color >> 24) & 0xFF;
+    int r = (original_color >> 16) & 0xFF;
+    int g = (original_color >> 8) & 0xFF;
+    int b = original_color & 0xFF;
+    
+    // Reduce each color component
+    r = (int)(r * (1.0 - darkness_factor));
+    g = (int)(g * (1.0 - darkness_factor));
+    b = (int)(b * (1.0 - darkness_factor));
+    
+    // Reconstruct the color
+    return create_trgb(t, r, g, b);
+}
+int create_trgb(int t, int r, int g, int b) 
+{
+    return (t << 24 | r << 16 | g << 8 | b);
+}
 void color_square(int x, int y, int color, t_data *d)
 {
 	for(int i = 0; i < T_SIZE * MINIMAP_SCALE_F; i++)
@@ -99,6 +119,6 @@ void draw_map(t_gdata *d, t_data *data)
 		}
 		i++;
 	}
-	mlx_put_image_to_window(data->s, data->win, data->img, 0, 0);
+	//mlx_put_image_to_window(data->s, data->win, data->img, 0, 0);
 
 }
