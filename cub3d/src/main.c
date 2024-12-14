@@ -8,7 +8,7 @@ void init_player(t_gdata *data)
 	data->p->radius = 3;
 	data->p->turn_dir = 0; //if turn left -1 right 1
 	data->p->walk_dir = 0; // move upword 1 move backward -1
-	data->p->rot_speed = 1 * M_PI / 180;
+	data->p->rot_speed = 0.5 * M_PI / 180;
 	data->p->rot_angle = M_PI / 2;
 }
 
@@ -81,9 +81,9 @@ void calc_rays(t_data *d)
 		////////////////////////////////////////////////////////////////
 		/////////////////horizontal intersection////////////////////////
 		////////////////////////////////////////////////////////////////
-		double xstep;
-		double ystep;
-		double x_intercept, y_intercept;
+		int xstep;
+		int ystep;
+		long x_intercept, y_intercept;
 
 		y_intercept = floor(p->y / T_SIZE)* T_SIZE;
 		y_intercept += rays[col_id].is_down  * T_SIZE;
@@ -134,7 +134,7 @@ void calc_rays(t_data *d)
 		check_x = x_intercept;
 		check_y = y_intercept;
 	
-		while (check_x < d->gdata->map_x * T_SIZE && check_y < d->gdata->map_y * T_SIZE && check_x > 0 && check_y > 0)
+		while ((check_x < d->gdata->map_x * T_SIZE) && (check_y < d->gdata->map_y * T_SIZE) && (check_x > 0) && (check_y > 0))
 		{
 			int test = check_x - (rays[col_id].is_left ? 1 : 0);
 			if((d->gdata->map[check_y / T_SIZE][test/ T_SIZE] == '1'))
@@ -148,8 +148,8 @@ void calc_rays(t_data *d)
 			check_y += ystep;
 		}
 		//todo make two var if the hit bool is true set the distancd accordernly if not its 0 then check if the distance is greaster than 0 then redner the line
-		double dst_vert;
-		double dst_horz;
+		long dst_vert;
+		long dst_horz;
 
 		dst_horz = 0;
 		dst_vert = 0;
@@ -163,13 +163,10 @@ void calc_rays(t_data *d)
 			if(!dst_vert)
 				dst_vert = __INT_MAX__;
 		}
-		// rays[col_id].hit_y = (dst_horz < dst_vert) * horz_wall_y +  (dst_horz > dst_vert) * vert_wall_y;
-		// rays[col_id].hit_x = (dst_horz < dst_vert) * horz_wall_x +  (dst_horz > dst_vert) * vert_wall_x;
-		// rays[col_id].distance = (dst_horz < dst_vert) * dst_horz +  (dst_horz > dst_vert) * dst_vert;
-		
+	
 		//todo romove the rendering and render in the while loop
 		// printf("deg %f col %i h:%i v:%i d_vert %f d_hor %f\n", rad2deg(rays[col_id].angle), col_id, found_horz_hit, found_vert_hit, dst_vert, dst_horz);
-		if(found_vert_hit &&  (dst_vert < dst_horz) )
+		if((dst_vert < dst_horz) && found_vert_hit)
 		{
 			draw_line(d, p->x * MINIMAP_SCALE_F,
 			p->y * MINIMAP_SCALE_F,
@@ -179,9 +176,10 @@ void calc_rays(t_data *d)
 			rays[col_id].hit_y = vert_wall_y;
 			rays[col_id].hit_x = vert_wall_x;
 			rays[col_id].distance = dst_vert;
+			rays[col_id].dir_hit = 1;
 		
 		}
-		else if(found_horz_hit && dst_horz < dst_vert)
+		else if(dst_horz <= dst_vert && found_horz_hit)
 		{
 			draw_line(d, p->x * MINIMAP_SCALE_F,
 			 p->y * MINIMAP_SCALE_F,
@@ -191,13 +189,8 @@ void calc_rays(t_data *d)
 			rays[col_id].hit_y = horz_wall_y;
 			rays[col_id].hit_x = horz_wall_x;
 			rays[col_id].distance = dst_horz;
-		
+			rays[col_id].dir_hit = 0;
 		}
-		// if(!rays[col_id]. distance)
-		// {
-		// 	printf("iam hers %d\n", rays[col_id].column_id);
-		// }
-
 		s_ang += FOV / (NUM_RAYS - 1);
 	}
 	// exit(3);
@@ -217,18 +210,17 @@ void render3dprojectd_walls(t_data *d)
 		// change the ray distance to the corrected one to avoid the fish bowl effetct
 		// corrected_dst = ray_dist * cos(ray.angle - p->angle)
 		// printf("ray dist %f %f\n", ray_dist, rad2deg(d->gdata->p->r[i].angle));
-		// if(ray_dist == 0 || ray_dist < 0)
-		// 	continue;
+		if(ray_dist == 0 || ray_dist < 0)
+			continue;
 		// dist to the projection plane
 		double correctd_dst = ray_dist *  cos(d->gdata->p->r[i].angle - d->gdata->p->rot_angle);
 		dist_projection_plane = (W_WIDTH / 2) / tan(FOV / 2);
 		//wall heigth of every stripe
 		wall_stripe_height = ((double)T_SIZE / (double)correctd_dst) * dist_projection_plane;
-		printf("wall h %f\n", wall_stripe_height);
 		if(wall_stripe_height > W_HEIGHT)
 			wall_stripe_height = W_HEIGHT;
-		int color = VIOLET;
-		color = darken_color(VIOLET, 1  + correctd_dst/1000 );
+		int color = darken_color(VIOLET, 1 - 120/correctd_dst);
+		color = wall_shade_color(ray.dir_hit, VIOLET);
 		color_rect(i * WALL_STRIP_WIDTH,
 					(W_HEIGHT / 2) - (wall_stripe_height / 2),
 					WALL_STRIP_WIDTH,wall_stripe_height, color, d);

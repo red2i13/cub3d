@@ -46,6 +46,8 @@ void color_rect(int x, int y, int width, int height, int color, t_data *d)
 }
 int darken_color(int original_color, float darkness_factor) 
 {
+	if(darkness_factor < 0)
+		darkness_factor = 0;
     // Extract individual color components
     int t = (original_color >> 24) & 0xFF;
     int r = (original_color >> 16) & 0xFF;
@@ -59,6 +61,19 @@ int darken_color(int original_color, float darkness_factor)
     
     // Reconstruct the color
     return create_trgb(t, r, g, b);
+}
+int wall_shade_color(bool wall_dir, int color) 
+{
+	int t = (color >> 24) & 0xFF;
+    int r = (color >> 16) & 0xFF;
+    int g = (color >> 8) & 0xFF;
+    int b = color & 0xFF;
+    
+	int var = wall_dir ? 255 : 180;
+    r = (int)(r + var);
+    g = (int)(g + var);
+    b = (int)(b + var);    
+	return (t << 24 | r << 16 | g << 8 | b);
 }
 int create_trgb(int t, int r, int g, int b) 
 {

@@ -62,7 +62,7 @@
 #define WALL_STRIP_WIDTH 8
 #define NUM_RAYS W_WIDTH/WALL_STRIP_WIDTH
 #define MINIMAP_SCALE_F 0.2
-// #define MINIMAP_SCALE_F 1.8
+// #define MINIMAP_SCALE_F 1.0
 
 /*struct*/
 typedef struct node
@@ -79,6 +79,7 @@ typedef struct s_ray
 	int		hit_x;
 	int		hit_y;
 	double	distance;
+	bool	dir_hit;
 	bool	is_down;
 	bool	is_up;
 	bool	is_right;
@@ -124,6 +125,8 @@ typedef struct s_data {
 }				t_data;
 
 /*Functions prototype*/
+int wall_shade_color(bool wall_dir, int color) ;
+int create_transparent_color(double opacity, int color) ;
 int		find_longest_row(char **map, t_gdata *d);
 int		read_map(int fd, t_gdata *data);
 int		bfs(int st_x, int st_y, t_gdata *d, t_data *data);
