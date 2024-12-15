@@ -69,10 +69,11 @@ int wall_shade_color(bool wall_dir, int color)
     int g = (color >> 8) & 0xFF;
     int b = color & 0xFF;
     
-	int var = wall_dir ? 255 : 180;
-    r = (int)(r + var);
-    g = (int)(g + var);
-    b = (int)(b + var);    
+	float var = wall_dir ? 0.1 : 0.7;
+
+	r = (int)(r * (1.0 - var));
+    g = (int)(g * (1.0 - var));
+    b = (int)(b * (1.0 - var));  
 	return (t << 24 | r << 16 | g << 8 | b);
 }
 int create_trgb(int t, int r, int g, int b) 
