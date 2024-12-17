@@ -57,16 +57,15 @@
 /*Macros*/
 #define W_WIDTH 640
 #define W_HEIGHT 480
-//#define M_PI acos(-1.0)
 #define T_SIZE 64
 #define FOV 60 * (M_PI / 180)
 #define WALL_STRIP_WIDTH 4
 #define NUM_RAYS W_WIDTH/WALL_STRIP_WIDTH
-#define MINIMAP_SCALE_F 0.2
+#define MINIMAP_SCALE_F 0.8
 #define MOVE_SPEED 3 * SPEED_MULTIPLIER
 #define ROT_SPEED  SPEED_MULTIPLIER * 2 * M_PI / 180;
 // #define MINIMAP_SCALE_F 1.0
-#define FPS 60
+#define FPS 75
 #define FRAME_TIME_LENGTH (1000/FPS)
 #define SPEED_MULTIPLIER 60.0f/ FPS
 /*struct*/
@@ -81,8 +80,8 @@ typedef struct s_ray
 {
 	double	angle;
 	int		column_id;
-	int		hit_x;
-	int		hit_y;
+	float	hit_x;
+	float	hit_y;
 	double	distance;
 	bool	dir_hit;
 	bool	is_down;
@@ -131,8 +130,9 @@ typedef struct s_data {
 }				t_data;
 
 /*Functions prototype*/
-int wall_shade_color(bool wall_dir, int color) ;
-int create_transparent_color(double opacity, int color) ;
+int		mapis_wall(float x, float y, char **map);
+int 	wall_shade_color(bool wall_dir, int color) ;
+int 	create_transparent_color(double opacity, int color) ;
 int		find_longest_row(char **map, t_gdata *d);
 int		read_map(int fd, t_gdata *data);
 int		bfs(int st_x, int st_y, t_gdata *d, t_data *data);

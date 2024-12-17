@@ -50,13 +50,14 @@ double calc_dist(long x, long x1, long y , long y1)
 	dy = y1 - y;
 	return(sqrt(dx * dx + dy * dy));
 }
-void cast_ray(t_data *d, int col_id, float ray_angle)
-{
-	t_ray *rays;
+// void cast_ray(t_data *d, int col_id, float ray_angle)
+// {
+// 	t_ray *rays;
 
-	rays = d->gdata->p->r;
+// 	rays = d->gdata->p->r;
+
 	
-}
+// }
 void calc_rays(t_data *d)
 {
 	int col_id;
@@ -83,14 +84,14 @@ void calc_rays(t_data *d)
 			rays[col_id].is_right = 0;
 		else
 			rays[col_id].is_right = 1;
-
+		// rays[col_id].is_right = ray_angle < 0.5 * M_PI || ray_angle > 1.5 * M_PI;
 		rays[col_id].is_left = !rays[col_id].is_right;
 		////////////////////////////////////////////////////////////////
 		/////////////////horizontal intersection////////////////////////
 		////////////////////////////////////////////////////////////////
-		int xstep;
-		int ystep;
-		long x_intercept, y_intercept;
+		float xstep;
+		float ystep;
+		float x_intercept, y_intercept;
 
 		y_intercept = floor(p->y / T_SIZE)* T_SIZE;
 		y_intercept += rays[col_id].is_down  * T_SIZE;
@@ -104,23 +105,27 @@ void calc_rays(t_data *d)
 			xstep *= -1;
 		//variable for checking if the intercption point is the wall or not and 
 		//adding the case if the ray is facing upword add 1 pixel to be able to check it evenly
-		long horz_wall_x, horz_wall_y;
-		long check_x, check_y;
+		float horz_wall_x, horz_wall_y;
+		float check_x, check_y;
 
-		check_x = x_intercept;
-		check_y = y_intercept;
-		while (check_x < d->gdata->map_x * T_SIZE && check_y < d->gdata->map_y * T_SIZE && check_x > 0 && check_y > 0)
+		// check_x = x_intercept;
+		// check_y = y_intercept;
+		float nexthorztouchx = x_intercept;
+		float nexthorztouchy = y_intercept;
+		// while(1)
+		while (nexthorztouchx < W_WIDTH && nexthorztouchy < W_HEIGHT && nexthorztouchx >= 0 && nexthorztouchy >= 0)
 		{
-			int test1 = check_y - (rays[col_id].is_up ? 1 : 0);
-			if((d->gdata->map[test1 / T_SIZE][check_x/ T_SIZE] == '1'))
+			check_x = nexthorztouchx;
+			check_y = nexthorztouchy+ (rays[col_id].is_up ? -1 : 0);
+			if(!mapis_wall(check_x, check_y, d->gdata->map))
 			{
-				horz_wall_x = check_x;
-				horz_wall_y = check_y;
+				horz_wall_x = nexthorztouchx;
+				horz_wall_y = nexthorztouchy;
 				found_horz_hit = true;
 				break;
 			}
-			check_x += xstep;
-			check_y += ystep;
+			nexthorztouchx += xstep;
+			nexthorztouchy += ystep;
 		}
 		////////////////////////////////////////////////////////////////
 		/////////////////vertical intersection////////////////////////
@@ -137,22 +142,24 @@ void calc_rays(t_data *d)
 			ystep *= -1;
 		long vert_wall_x, vert_wall_y;
 		//long check_x, check_y;
-	
-		check_x = x_intercept;
-		check_y = y_intercept;
-	
-		while ((check_x < d->gdata->map_x * T_SIZE) && (check_y < d->gdata->map_y * T_SIZE) && (check_x > 0) && (check_y > 0))
+
+		float nextverttouchx = x_intercept;
+		float nextverttouchy = y_intercept;
+		while ((nextverttouchx < W_WIDTH) && (nextverttouchy < W_HEIGHT) && (nextverttouchx >= 0) && (nextverttouchy >= 0))
+		// while(1)
 		{
-			int test = check_x - (rays[col_id].is_left ? 1 : 0);
-			if((d->gdata->map[check_y / T_SIZE][test/ T_SIZE] == '1'))
+			check_x = nextverttouchx;
+			check_y = nextverttouchy + (rays[col_id].is_left ? -1 : 0);
+			printf("debug %d\n",mapis_wall(check_x, check_y, d->gdata->map));
+			if(!mapis_wall(check_x, check_y, d->gdata->map))
 			{
 				vert_wall_x = check_x;
 				vert_wall_y = check_y;
 				found_vert_hit = true;
 				break;
 			}
-			check_x += xstep;
-			check_y += ystep;
+			nextverttouchx += xstep;
+			nextverttouchy += ystep;
 		}
 		//todo make two var if the hit bool is true set the distancd accordernly if not its 0 then check if the distance is greaster than 0 then redner the line
 		long dst_vert;
@@ -199,6 +206,7 @@ void calc_rays(t_data *d)
 			rays[col_id].dir_hit = 0;
 		}
 		ray_angle += FOV / (NUM_RAYS - 1);
+		break;
 	}
 }
 void render3dprojectd_walls(t_data *d)
@@ -391,14 +399,14 @@ int update(t_data *d)
 	sx = round(move_step * cos(d->gdata->p->rot_angle));
 	sy = round(move_step * sin(d->gdata->p->rot_angle));
 
-	if(mapis_wall(d->gdata->p->x + sx, d->gdata->p->y + sy, d->gdata->map))
-	{
-		d->gdata->p->x += sx;
-		d->gdata->p->y += sy;
-	}	
-	// d->gdata->p->x += sx *(d->gdata->map[d->gdata->p->y/T_SIZE][(d->gdata->p->x + sx)/T_SIZE ] != '1');
-	// d->gdata->p->y += sy *(d->gdata->map[(d->gdata->p->y + sy)/T_SIZE ][d->gdata->p->x/T_SIZE] != '1');
-	//
+	// if(mapis_wall(d->gdata->p->x + sx, d->gdata->p->y + sy, d->gdata->map))
+	// {
+	// 	d->gdata->p->x += sx;
+	// 	d->gdata->p->y += sy;
+	// }	
+	d->gdata->p->x += sx *(d->gdata->map[d->gdata->p->y/T_SIZE][(d->gdata->p->x + sx)/T_SIZE ] != '1');
+	d->gdata->p->y += sy *(d->gdata->map[(d->gdata->p->y + sy)/T_SIZE ][d->gdata->p->x/T_SIZE] != '1');
+	
 	return(0);
 }
 int main(int ac, char **av)

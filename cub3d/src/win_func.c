@@ -64,7 +64,7 @@ int darken_color(int original_color, float darkness_factor)
     int b = original_color & 0xFF;
     
     // Reduce each color component
-    r = (int)(r * (1.0 - darkness_factor));
+    r = (int)(r * (1.0 - darkness_factor));     
     g = (int)(g * (1.0 - darkness_factor));
     b = (int)(b * (1.0 - darkness_factor));
     
