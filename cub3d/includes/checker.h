@@ -50,6 +50,7 @@
 # include <stdlib.h>
 # include <string.h>
 # include <math.h>
+# include <sys/time.h>
 # include <stdbool.h>
 # include "../libft/libft.h"
 
@@ -62,8 +63,12 @@
 #define WALL_STRIP_WIDTH 4
 #define NUM_RAYS W_WIDTH/WALL_STRIP_WIDTH
 #define MINIMAP_SCALE_F 0.2
+#define MOVE_SPEED 3 * SPEED_MULTIPLIER
+#define ROT_SPEED  SPEED_MULTIPLIER * 2 * M_PI / 180;
 // #define MINIMAP_SCALE_F 1.0
-
+#define FPS 60
+#define FRAME_TIME_LENGTH (1000/FPS)
+#define SPEED_MULTIPLIER 60.0f/ FPS
 /*struct*/
 typedef struct node
 {
@@ -111,6 +116,7 @@ typedef struct s_gdata
 	int res_y;
 	int map_x;
 	int map_y;
+	size_t gm_time;
 }				t_gdata;
 
 typedef struct s_data {
@@ -144,4 +150,5 @@ void	my_mlx_pixel_put(t_data *data, int x, int y, int color);
 void 	color_square(int x, int y, int color, t_data *d);
 void 	color_rect(int x, int y, int width, int height, int color, t_data *d);
 void 	draw_map(t_gdata *d, t_data *data);
+size_t  get_current_time(void);
 #endif

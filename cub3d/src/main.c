@@ -4,12 +4,13 @@ void init_player(t_gdata *data)
 {
 	data->p->y = data->st_pos[0] * T_SIZE + T_SIZE /2;
 	data->p->x = data->st_pos[1] * T_SIZE + T_SIZE /2;
-	data->p->move_speed = 1.0;//2 for linux post
+	data->p->move_speed = MOVE_SPEED;
 	data->p->radius = 3;
 	data->p->turn_dir = 0; //if turn left -1 right 1
 	data->p->walk_dir = 0; // move upword 1 move backward -1
-	data->p->rot_speed = 0.5 * M_PI / 180;
+	data->p->rot_speed = ROT_SPEED;
 	data->p->rot_angle = M_PI / 2;
+	data->p->r = NULL;
 }
 
 void draw_circle(t_data *data, double cx, double cy, float radius)
@@ -49,6 +50,13 @@ double calc_dist(long x, long x1, long y , long y1)
 	dy = y1 - y;
 	return(sqrt(dx * dx + dy * dy));
 }
+void cast_ray(t_data *d, int col_id, float ray_angle)
+{
+	t_ray *rays;
+
+	rays = d->gdata->p->r;
+	
+}
 void calc_rays(t_data *d)
 {
 	int col_id;
@@ -61,15 +69,14 @@ void calc_rays(t_data *d)
 	bool found_vert_hit = false;
 	bool found_horz_hit = false;
 	p = d->gdata->p;
-	double s_ang = p->rot_angle - (FOV / 2.0);
+	double ray_angle = p->rot_angle - (FOV / 2.0);
 	col_id = 0;
 	for(; col_id < NUM_RAYS; col_id++)
 	{
 		rays[col_id].column_id = col_id;
 		found_horz_hit = false;
 		found_vert_hit = false;
-		rays[col_id].angle = norm_angle(s_ang);
-		// printf("debug angle %f\n", rad2deg(rays[col_id].angle));
+		rays[col_id].angle = norm_angle(ray_angle);
 		rays[col_id].is_down = (rays[col_id].angle > 0) && (rays[col_id].angle < M_PI);
 		rays[col_id].is_up = !rays[col_id].is_down;
 		if((rays[col_id].angle > M_PI / 2) && (rays[col_id].angle < M_PI * 3/2))
@@ -191,9 +198,8 @@ void calc_rays(t_data *d)
 			rays[col_id].distance = dst_horz;
 			rays[col_id].dir_hit = 0;
 		}
-		s_ang += FOV / (NUM_RAYS - 1);
+		ray_angle += FOV / (NUM_RAYS - 1);
 	}
-	// exit(3);
 }
 void render3dprojectd_walls(t_data *d)
 {
@@ -202,6 +208,8 @@ void render3dprojectd_walls(t_data *d)
 	double dist_projection_plane;
 	double wall_stripe_height;
 
+	if(!d->gdata->p->r)
+		return;
 	for(int i = 0; i < NUM_RAYS; i++)
 	{
 		ray = d->gdata->p->r[i];
@@ -209,7 +217,6 @@ void render3dprojectd_walls(t_data *d)
 
 		// change the ray distance to the corrected one to avoid the fish bowl effetct
 		// corrected_dst = ray_dist * cos(ray.angle - p->angle)
-		// printf("ray dist %f %f\n", ray_dist, rad2deg(d->gdata->p->r[i].angle));
 		if(ray_dist == 0 || ray_dist < 0)
 			continue;
 		// dist to the projection plane
@@ -220,7 +227,7 @@ void render3dprojectd_walls(t_data *d)
 		if(wall_stripe_height > W_HEIGHT)
 			wall_stripe_height = W_HEIGHT;
 		int color = darken_color(VIOLET, 1 - 120/correctd_dst);
-		color = wall_shade_color(ray.dir_hit, VIOLET);
+		//color = wall_shade_color(ray.dir_hit, VIOLET);
 		color_rect(i * WALL_STRIP_WIDTH,
 					(W_HEIGHT / 2) - (wall_stripe_height / 2),
 					WALL_STRIP_WIDTH,wall_stripe_height, color, d);
@@ -345,16 +352,31 @@ int key_press(int keycode, t_player *p)
 	// printf("walk dirc %i\n", p->walk_dir);
 	return(0);
 }
+void update_frame_time()
+{
+	size_t st_time = get_current_time();
+	while(get_current_time() - st_time < FRAME_TIME_LENGTH);
+	//instead of update the var of movement and rotation aribtary make this function return a delta time that will improve the moves
+	//last time is st_time
+}
+int	mapis_wall(float x, float y, char **map)
+{
+	// if(x < 0 || y < 0 || x > W_WIDTH || y > W_HEIGHT)
+	// 	return(1);
+	int map_grid_x;
+	int map_grid_y;
 
+	map_grid_x = floor(x / T_SIZE);
+	map_grid_y = floor(y / T_SIZE);
+	return(map[map_grid_y][map_grid_x] != '1');
+}
 int update(t_data *d)
 {
+	//function that update the frame
 
+	update_frame_time();
 	clear_image(d);
 	// draw_test(d,  d->gdata->p->rot_angle , d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F);
-	// for(int i = 0; i < NUM_RAYS; i++)
-	// {
-	// 	printf("col %d dist %f \n", d->gdata->p->r[i].column_id, d->gdata->p->r[i].distance);
-	// }
 	render3dprojectd_walls(d);
 	draw_map(d->gdata, d);
 	draw_circle(d,  d->gdata->p->x * MINIMAP_SCALE_F , d->gdata->p->y * MINIMAP_SCALE_F, 4);
@@ -368,9 +390,14 @@ int update(t_data *d)
 	int sx, sy;
 	sx = round(move_step * cos(d->gdata->p->rot_angle));
 	sy = round(move_step * sin(d->gdata->p->rot_angle));
-	// printf("curr %c %d %d\n", d->gdata->map[d->gdata->p->y/T_SIZE][d->gdata->p->x/T_SIZE ],sx, sy);
-	d->gdata->p->x += sx *(d->gdata->map[d->gdata->p->y/T_SIZE][(d->gdata->p->x + sx)/T_SIZE ] != '1');
-	d->gdata->p->y += sy *(d->gdata->map[(d->gdata->p->y + sy)/T_SIZE ][d->gdata->p->x/T_SIZE] != '1');
+
+	if(mapis_wall(d->gdata->p->x + sx, d->gdata->p->y + sy, d->gdata->map))
+	{
+		d->gdata->p->x += sx;
+		d->gdata->p->y += sy;
+	}	
+	// d->gdata->p->x += sx *(d->gdata->map[d->gdata->p->y/T_SIZE][(d->gdata->p->x + sx)/T_SIZE ] != '1');
+	// d->gdata->p->y += sy *(d->gdata->map[(d->gdata->p->y + sy)/T_SIZE ][d->gdata->p->x/T_SIZE] != '1');
 	//
 	return(0);
 }
