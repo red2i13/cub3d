@@ -115,9 +115,9 @@ void calc_rays(t_data *d)
 		
 		while (nexthorztouchx <= W_WIDTH && nexthorztouchx >= 0 && nexthorztouchy >= 0)
 		{
-			printf("%f %f\n", nexthorztouchx, nexthorztouchy);
-			if(nexthorztouchy > W_HEIGHT)
-				printf("Error\n");
+			// printf("%f %f\n", nexthorztouchx, nexthorztouchy);
+			// if(nexthorztouchy > W_HEIGHT)
+			// 	printf("Error\n");
 			check_x = nexthorztouchx;
 			check_y = nexthorztouchy + (rays[col_id].is_up ? -1 : 0);
 			if(!mapis_wall(check_x, check_y, d->gdata->map))
@@ -153,9 +153,9 @@ void calc_rays(t_data *d)
 		// while ((nextverttouchx >= 0) && (nextverttouchy >= 0))
 		{
 			check_x = nextverttouchx;
-			check_y = nextverttouchy + (rays[col_id].is_left ? -1 : 0);
+			check_y = nextverttouchy + (rays[col_id].is_left ? -3 : 0);
 			// printf("debug %d\n",mapis_wall(check_x, check_y, d->gdata->map));
-			printf("%f %f\n", nextverttouchx, nextverttouchy);
+			// printf("%f %f\n", nextverttouchx, nextverttouchy);
 			if(!mapis_wall(check_x, check_y, d->gdata->map))
 			{
 				vert_wall_x = check_x;
@@ -211,7 +211,7 @@ void calc_rays(t_data *d)
 			rays[col_id].dir_hit = 0;
 		}
 		ray_angle += FOV / (NUM_RAYS - 1);
-		break;
+		// break;
 	}
 }
 void render3dprojectd_walls(t_data *d)
@@ -374,14 +374,16 @@ void update_frame_time()
 }
 int	mapis_wall(float x, float y, char **map)
 {
-	// if(x < 0 || y < 0 || x > W_WIDTH || y > W_HEIGHT)
-	// 	return(1);
+	if(x < 0 || y < 0 || x > W_WIDTH || y > W_HEIGHT)
+		return(1);
 	int map_grid_x;
 	int map_grid_y;
 
 	map_grid_x = floor(x / T_SIZE);
 	map_grid_y = floor(y / T_SIZE);
-	printf("debug %c\n", map[map_grid_y][map_grid_x]);
+	if(map_grid_y > 10||!map[map_grid_y] )
+		return(false);
+	// printf("debug %d %d\n", map_grid_x, map_grid_y);
 	return(map[map_grid_y][map_grid_x] != '1');
 }
 int update(t_data *d)

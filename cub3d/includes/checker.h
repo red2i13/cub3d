@@ -55,17 +55,17 @@
 # include "../libft/libft.h"
 
 /*Macros*/
-#define W_WIDTH 640
-#define W_HEIGHT 480
+#define W_WIDTH 600
+#define W_HEIGHT 600
 #define T_SIZE 64
 #define FOV 60 * (M_PI / 180)
-#define WALL_STRIP_WIDTH 4
+#define WALL_STRIP_WIDTH 10
 #define NUM_RAYS W_WIDTH/WALL_STRIP_WIDTH
-#define MINIMAP_SCALE_F 0.8
+#define MINIMAP_SCALE_F 0.4
 #define MOVE_SPEED 3 * SPEED_MULTIPLIER
 #define ROT_SPEED  SPEED_MULTIPLIER * 2 * M_PI / 180;
-// #define MINIMAP_SCALE_F 1.0
-#define FPS 75
+// #define MINIMAP_SCALE_F 0.5
+#define FPS 60
 #define FRAME_TIME_LENGTH (1000/FPS)
 #define SPEED_MULTIPLIER 60.0f/ FPS
 /*struct*/
