@@ -112,11 +112,14 @@ void calc_rays(t_data *d)
 		// check_y = y_intercept;
 		float nexthorztouchx = x_intercept;
 		float nexthorztouchy = y_intercept;
-		// while(1)
-		while (nexthorztouchx < W_WIDTH && nexthorztouchy < W_HEIGHT && nexthorztouchx >= 0 && nexthorztouchy >= 0)
+		
+		while (nexthorztouchx <= W_WIDTH && nexthorztouchx >= 0 && nexthorztouchy >= 0)
 		{
+			printf("%f %f\n", nexthorztouchx, nexthorztouchy);
+			if(nexthorztouchy > W_HEIGHT)
+				printf("Error\n");
 			check_x = nexthorztouchx;
-			check_y = nexthorztouchy+ (rays[col_id].is_up ? -1 : 0);
+			check_y = nexthorztouchy + (rays[col_id].is_up ? -1 : 0);
 			if(!mapis_wall(check_x, check_y, d->gdata->map))
 			{
 				horz_wall_x = nexthorztouchx;
@@ -127,6 +130,7 @@ void calc_rays(t_data *d)
 			nexthorztouchx += xstep;
 			nexthorztouchy += ystep;
 		}
+		// exit(5);
 		////////////////////////////////////////////////////////////////
 		/////////////////vertical intersection////////////////////////
 		////////////////////////////////////////////////////////////////
@@ -145,12 +149,13 @@ void calc_rays(t_data *d)
 
 		float nextverttouchx = x_intercept;
 		float nextverttouchy = y_intercept;
-		while ((nextverttouchx < W_WIDTH) && (nextverttouchy < W_HEIGHT) && (nextverttouchx >= 0) && (nextverttouchy >= 0))
-		// while(1)
+		while (nextverttouchx <= W_WIDTH && nextverttouchx >= 0 && nextverttouchy >= 0)
+		// while ((nextverttouchx >= 0) && (nextverttouchy >= 0))
 		{
 			check_x = nextverttouchx;
 			check_y = nextverttouchy + (rays[col_id].is_left ? -1 : 0);
-			printf("debug %d\n",mapis_wall(check_x, check_y, d->gdata->map));
+			// printf("debug %d\n",mapis_wall(check_x, check_y, d->gdata->map));
+			printf("%f %f\n", nextverttouchx, nextverttouchy);
 			if(!mapis_wall(check_x, check_y, d->gdata->map))
 			{
 				vert_wall_x = check_x;
@@ -376,6 +381,7 @@ int	mapis_wall(float x, float y, char **map)
 
 	map_grid_x = floor(x / T_SIZE);
 	map_grid_y = floor(y / T_SIZE);
+	printf("debug %c\n", map[map_grid_y][map_grid_x]);
 	return(map[map_grid_y][map_grid_x] != '1');
 }
 int update(t_data *d)
