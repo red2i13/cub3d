@@ -55,16 +55,15 @@
 # include "../libft/libft.h"
 
 /*Macros*/
-#define W_WIDTH 600
+#define W_WIDTH 1280
 #define W_HEIGHT 600
 #define T_SIZE 64
 #define FOV 60 * (M_PI / 180)
-#define WALL_STRIP_WIDTH 10
+#define WALL_STRIP_WIDTH 1
 #define NUM_RAYS W_WIDTH/WALL_STRIP_WIDTH
-#define MINIMAP_SCALE_F 0.4
+#define MINIMAP_SCALE_F 1.0
 #define MOVE_SPEED 3 * SPEED_MULTIPLIER
 #define ROT_SPEED  SPEED_MULTIPLIER * 2 * M_PI / 180;
-// #define MINIMAP_SCALE_F 0.5
 #define FPS 60
 #define FRAME_TIME_LENGTH (1000/FPS)
 #define SPEED_MULTIPLIER 60.0f/ FPS
@@ -76,19 +75,19 @@ typedef struct node
 	int			x;
 	int			y;
 }				t_node;
-typedef struct s_ray
+typedef struct s_rays
 {
 	double	angle;
 	int		column_id;
-	float	hit_x;
-	float	hit_y;
+	float	wallHitX;
+	float	wallHitY;
 	double	distance;
 	bool	dir_hit;
-	bool	is_down;
-	bool	is_up;
-	bool	is_right;
-	bool	is_left;
-}				t_ray;
+	bool	isRayFacingDown;
+	bool	isRayFacingUp;
+	bool	isRayFacingRight;
+	bool	isRayFacingLeft;
+}				t_rays[NUM_RAYS];;
 
 typedef struct s_player {
 	int x;
@@ -99,13 +98,11 @@ typedef struct s_player {
 	double rot_angle;
 	double move_speed;
 	double rot_speed;
-	t_ray *r;
 
 }				t_player;
 
 typedef struct s_gdata
 {
-	t_player *p;
 	char **map;
 	int st_pos[2];
 	int c[3];
@@ -119,6 +116,8 @@ typedef struct s_gdata
 }				t_gdata;
 
 typedef struct s_data {
+	t_player player;
+	t_rays rays;
 	t_gdata *gdata;
 	void	*s;
 	void	*win;
