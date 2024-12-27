@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   render_walls.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ysahraou <ysahraou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rbenmakh <rbenmakh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/25 11:25:31 by ysahraou          #+#    #+#             */
-/*   Updated: 2024/12/26 09:35:18 by ysahraou         ###   ########.fr       */
+/*   Updated: 2024/12/27 23:44:05 by rbenmakh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ void render_3d_walls(t_data *data)
 
     i = 0;
     correctDistance = 0;
+    
     while (i < NUM_RAYS)
     {
         color = RED;
@@ -66,6 +67,7 @@ void render_3d_walls(t_data *data)
         if (data->map[(int)data->rays[i].hit_y / TILE_SIZE][(int)data->rays[i].hit_x / TILE_SIZE] == 'D')
             color = GREEN;
         shade_color = darken_color(color, alpha);
+        (void)shade_color;
         wallStripHeight = ((double)TILE_SIZE / correctDistance) * distanceProjPlane;
         //todo : make a loop to map the each wall strip to the texture mapping
         //add vars wall_height_top and wall_height_bottom
@@ -74,6 +76,7 @@ void render_3d_walls(t_data *data)
         double wall_height_bottom = (WINDOW_HEIGHT / 2) + ((int)wallStripHeight / 2);
         wall_height_bottom = wall_height_bottom > WINDOW_HEIGHT ? WINDOW_HEIGHT : wall_height_bottom;
        //calculate the offset to acess to the texture buffer
+       //create two variable texture_offset_x and  texture_offset_y  
        double texture_offset_x = 0;
        double texture_offset_y = 0;
        if(data->rays[i].Was_hit_vertical)
@@ -84,28 +87,32 @@ void render_3d_walls(t_data *data)
        {
            texture_offset_x = (int)data->rays[i].hit_x % TILE_SIZE;
        }
-       printf("texture_offset_x = %f\n", texture_offset_x);
-    //    exit(3);
-       //create two variable texture_offset_x and  texture_offset_y  
-       //color the wall from wall height top to wall height bottom
+       (void)texture_offset_x;
+       (void)texture_offset_y;
+    //    printf("texture_offset_x = %f\n", texture_offset_x);
+        //color the wall from wall height top to wall height bottom
        for(int j = wall_height_top; j < wall_height_bottom;j++)
        {
+            // printf("j = %d\n", j);
+            // printf("wall_height_top = %f wall_height_bottom = %f\n", wall_height_top, wall_height_bottom);
            //calculate the texture offset y
-           texture_offset_y = (j - wall_height_top) * ((double)TILE_SIZE / (double)wallStripHeight);
-           printf("texture_offset_y = %f\n", texture_offset_y);
-        //    exit(3);
+           int dst_from_top = j + (wallStripHeight / 2) - (WINDOW_HEIGHT / 2);
+           texture_offset_y = dst_from_top * ((double)TILE_SIZE / (double)wallStripHeight);
+        //    printf("texture_offset_y = %f\n", texture_offset_y);
            //get the color from the texture buffer
-        //    mlx_xpm_file_to_image(data->mlx, data->txt[0], &data->txt[0], &data->txt[0]);
-           t_img_info iiimg ;//= malloc(sizeof(t_img_info));
-            iiimg.img_width = 64;
-           iiimg.img_height = 64;
-           iiimg.img = mlx_xpm_file_to_image(data->mlx, "./wall_txtures/Door1.xpm", &data->game_frame->img_width, &data->game_frame->img_height);
-           iiimg.addr = mlx_get_data_addr(iiimg.img, &iiimg.bits_per_pixel, &iiimg.line_length, &iiimg.endian);
-           color = get_px_color(&iiimg,texture_offset_x, texture_offset_y);
-           shade_color = darken_color(color, alpha);
-           ft_put_pixel(data->game_frame, i * WALL_STRIP_WIDTH, j, shade_color);             
+           //printf("address = %p\n", iiimg.img); 
+           //printf("address = %p\n", iiimg.img); 
+           //printf("color = %d\n", color);
+           color = get_px_color(data->iii,texture_offset_x, texture_offset_y);
+           //printf("color = %d\n", color);
+           //shade_color = darken_color(color, alpha);
+           (void)shade_color;
+        //    printf("x %i y %i\n", i, j);
+           ft_put_pixel(data->game_frame, i * WALL_STRIP_WIDTH, j, color);             
         }
-        // rect(data->game_frame, i * WALL_STRIP_WIDTH, (WINDOW_HEIGHT / 2) - ((int)wallStripHeight / 2), WALL_STRIP_WIDTH, (int)wallStripHeight, shade_color);
-           i++;
+        // printf("*****************************************\n");
+
+    // rect(data->game_frame, i * WALL_STRIP_WIDTH, (WINDOW_HEIGHT / 2) - ((int)wallStripHeight / 2), WALL_STRIP_WIDTH, (int)wallStripHeight, shade_color);
+        i++;
     }
 }

@@ -6,7 +6,7 @@
 /*   By: rbenmakh <rbenmakh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:10:37 by ysahraou          #+#    #+#             */
-/*   Updated: 2024/12/25 10:25:48 by rbenmakh         ###   ########.fr       */
+/*   Updated: 2024/12/27 21:35:08 by rbenmakh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ void render_p(t_img_info *img, t_player *p)
     y1 = p->y + sin(deg2rad(p->rotationAngle)) * LINE_LENGTH;
     draw_line_y(p->x, p->y, x1 , y1, img, 0x00FF0000);
 }
-
 
 void render_minimap(t_data *data)
 {

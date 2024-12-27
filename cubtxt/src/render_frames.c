@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   render_frames.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ysahraou <ysahraou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rbenmakh <rbenmakh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 17:42:54 by ysahraou          #+#    #+#             */
-/*   Updated: 2024/12/26 10:00:47 by ysahraou         ###   ########.fr       */
+/*   Updated: 2024/12/27 23:25:40 by rbenmakh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,14 +74,14 @@ int update(void *data1)
 
     data = (t_data *)data1;
     movement_update(data);
-    // printf("data animate weapon = %i\n", data->animate_weapon);
+    printf("data animate weapon = %i\n", data->animate_weapon);
     if (data->animate_weapon)
         animate_weapon_shoting(data, data->all_weapons[data->weapon_numb].shoting_end);
     else if (data->weapon_reload)
         animate_weapon_reload(data, data->all_weapons[data->weapon_numb].shoting_end);
     else
     {
-        render_minimap(data);
+        //render_minimap(data);
         castAllrays(data);
         floor_ceiling(data->game_frame, BLUE, WHITE);
         render_3d_walls(data);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ysahraou <ysahraou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rbenmakh <rbenmakh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 09:29:47 by ysahraou          #+#    #+#             */
-/*   Updated: 2024/12/26 10:15:29 by ysahraou         ###   ########.fr       */
+/*   Updated: 2024/12/27 23:26:27 by rbenmakh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,8 @@
 # define NUM_RAYS WINDOW_WIDTH / WALL_STRIP_WIDTH
 # define WINDOW_WIDTH 800
 # define WINDOW_HEIGHT 600
-# define FRAME_WIDTH (TILE_SIZE * 4)
-# define FRAME_HEIGHT (FRAME_WIDTH / 2)
+# define FRAME_WIDTH 100
+# define FRAME_HEIGHT 100
 # define TILE_SIZE 64
 # define RADIUS (TILE_SIZE / 15)
 # define LINE_LENGTH (RADIUS * 3)
@@ -180,6 +180,8 @@ typedef struct  s_data
 	char **map;
 	int mouse_x;
 	int mouse_y;
+	//debug
+	t_img_info *iii ;
 }               t_data;
 
 /*------------Functions Prototypes--------------*/

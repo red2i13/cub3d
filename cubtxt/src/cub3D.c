@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3D.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ysahraou <ysahraou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rbenmakh <rbenmakh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 09:25:55 by ysahraou          #+#    #+#             */
-/*   Updated: 2024/12/26 10:18:55 by ysahraou         ###   ########.fr       */
+/*   Updated: 2024/12/27 23:24:16 by rbenmakh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,18 @@ int main(int argc, char **argv)
     init_weapons(&data);
     p_setup(&data.player, data.map);
     init_bullet(&data);
+    //debug
+    data.iii = malloc(sizeof(t_img_info));
+    data.iii->img_width = 64;
+    data.iii->img_height = 64;
+    data.iii->img = NULL;
+    data.iii->img = mlx_xpm_file_to_image(data.mlx, "./wall_txtures/Door1.xpm", &data.iii->img_width, &data.iii->img_height);
+    if (data.iii->img == NULL)
+    {
+        printf("Error loading image\n");
+        return (1);
+    }
+    data.iii->addr = mlx_get_data_addr(data.iii->img, &data.iii->bits_per_pixel, &data.iii->line_length, &data.iii->endian);
     mlx_hook(data.mlx_win, ON_DESTROY, 0, close_win, &data);
     mlx_hook(data.mlx_win, ON_KEYDOWN, 1L << 0, key_p, &data);
     mlx_hook(data.mlx_win, ON_KEYUP, 1L << 1, key_r, &data);
